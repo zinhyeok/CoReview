@@ -3,7 +3,7 @@
 
 ### venv ###
 venv/
-
+.venv/
 ### Data ###
 data/ 
 *.csv
