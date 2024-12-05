@@ -1,0 +1,2 @@
+
+            "sec-fetch-mode": "cors",

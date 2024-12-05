@@ -4,6 +4,8 @@
 ### venv ###
 venv/
 .venv/
+.conda/
+
 ### Data ###
 data/ 
 *.csv
