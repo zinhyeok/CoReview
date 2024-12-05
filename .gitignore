@@ -6,6 +6,9 @@ venv/
 .venv/
 .conda/
 
+##crome driver
+*.exe
+
 ### Data ###
 data/ 
 *.csv
