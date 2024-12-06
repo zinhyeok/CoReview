@@ -122,83 +122,17 @@ class Coupang:
         for payload in payloads:
             self.fetch(payload=payload)
 
-    # #Slenium 사용으로 fetch 변경
-
-    # def fetch(self, payload: list[dict]) -> None:
-    #     now_page: str = payload["page"]
-    #     print(f"\n[INFO] Start crawling page {now_page} with Selenium...\n")
-
-    #     attempt = 0
-    #     while attempt < self.retries:
-    #         try:
-    #             # Selenium을 사용하여 페이지 로드
-    #             full_url = f"{self.base_review_url}?productId={payload['productId']}&page={payload['page']}&size={payload['size']}&sortBy={payload['sortBy']}"
-    #             self.ch.driver.get(full_url)
-
-    #             # 특정 요소가 로드될 때까지 대기
-    #             WebDriverWait(self.ch.driver, 20).until(
-    #                 EC.presence_of_element_located((By.CSS_SELECTOR, "article.sdp-review__article__list"))
-    #             )
-
-    #             # 현재 페이지 HTML 소스 가져오기
-    #             page_source = self.ch.driver.page_source
-    #             soup = bs(page_source, "html.parser")
-
-    #             # 데이터 추출 (기존 로직과 동일)
-    #             article_lenth = len(soup.select("article.sdp-review__article__list"))
-
-    #             for idx in range(article_lenth):
-    #                 dict_data: dict[str, str | int] = dict()
-    #                 articles = soup.select("article.sdp-review__article__list")
-
-    #                 # 데이터 파싱 로직 유지
-    #                 review_date = articles[idx].select_one(
-    #                     "div.sdp-review__article__list__info__product-info__reg-date"
-    #                 )
-    #                 review_date = review_date.text.strip() if review_date else "-"
-
-    #                 user_name = articles[idx].select_one(
-    #                     "span.sdp-review__article__list__info__user__name"
-    #                 )
-    #                 user_name = user_name.text.strip() if user_name else "-"
-
-    #                 rating = articles[idx].select_one(
-    #                     "div.sdp-review__article__list__info__product-info__star-orange"
-    #                 )
-    #                 rating = int(rating.attrs["data-rating"]) if rating else 0
-
-    #                 dict_data["title"] = self.title
-    #                 dict_data["review_date"] = review_date
-    #                 dict_data["user_name"] = user_name
-    #                 dict_data["rating"] = rating
-
-    #                 # 데이터를 저장
-    #                 self.sd.save(datas=dict_data)
-    #                 print(dict_data, "\n")
-    #             return
-
-    #         except Exception as e:
-    #             attempt += 1
-    #             print(f"Attempt {attempt}/{self.retries} failed: {e}")
-    #             if attempt < self.retries:
-    #                 time.sleep(self.delay)
-    #             else:
-    #                 print(f"최대 요청 시도 초과! 다시 실행하세요.")
-    #                 sys.exit()
-
-
     def fetch(self, payload: list[dict]) -> None:
         now_page: str = payload["page"]
         print(f"\n[INFO] Start crawling page {now_page} ...\n")
         attempt: int = 0
         while attempt < self.retries:
             try:
-                #response time 
                 resp = rq.get(
                     url=self.base_review_url,
                     headers=self.headers,
                     params=payload,
-                    timeout=5, 
+                    timeout=10,
                 )
                 html = resp.text
                 soup = bs(html, "html.parser")
@@ -292,10 +226,8 @@ class Coupang:
                     dict_data["answer"] = answer
                     self.sd.save(datas=dict_data)
                     print(dict_data, "\n")
-                
                 time.sleep(1)
                 return
-            
             except RequestException as e:
                 attempt += 1
                 print(f"Attempt {attempt}/{self.retries} failed: {e}")
@@ -337,7 +269,7 @@ class SaveData:
         self.ws = self.wb.active
         self.ws.append(["이름", "작성일자", "평점", "리뷰 내용", "맛 만족도"])
         self.row: int = 2
-        self.dir_name: str = "../../data"
+        self.dir_name: str = "Coupang-reviews"
         self.create_directory()
 
     def create_directory(self) -> None:
