@@ -40,6 +40,7 @@ isoduration==20.11.0
 jedi==0.19.2
 Jinja2==3.1.4
 joblib==1.4.2
+JPype1 @ file:///D:/bld/jpype1_1669727958178/work
 json5==0.10.0
 jsonpointer==3.0.0
 jsonschema==4.23.0
@@ -55,6 +56,9 @@ jupyterlab_pygments==0.3.0
 jupyterlab_server==2.27.3
 jupyterlab_widgets==3.0.13
 keybert==0.8.5
+konlpy==0.6.0
+krwordrank==1.0.3
+lxml==5.3.0
 markdown-it-py==3.0.0
 MarkupSafe==3.0.2
 matplotlib-inline==0.1.7
@@ -72,7 +76,7 @@ numpy==2.0.2
 openpyxl==3.1.5
 outcome==1.3.0.post0
 overrides==7.7.0
-packaging==24.2
+packaging @ file:///home/conda/feedstock_root/build_artifacts/packaging_1733203243479/work
 pandas==2.2.3
 pandocfilters==1.5.1
 parso==0.8.4
