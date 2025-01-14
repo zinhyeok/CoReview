@@ -11,6 +11,7 @@ venv/
 
 ### Data ###
 data/ 
+result/
 *.csv
 *.dat
 *.efx
