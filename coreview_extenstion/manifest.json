@@ -1,0 +1,19 @@
+{
+    "manifest_version": 3,
+    "name": "Shopping Review Summarizer",
+    "version": "1.0",
+    "permissions": ["activeTab", "scripting"],
+    "host_permissions": ["<all_urls>"],
+    "action": {
+      "default_popup": "popup.html",
+      "default_icon": {
+        "16": "imgs/icon.svg",
+        "48": "imgs/icon.svg",
+        "128": "imgs/icon.svg"
+      }
+    },
+    "background": {
+      "service_worker": "background.js"
+    }
+  }
+  
