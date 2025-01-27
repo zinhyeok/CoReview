@@ -3,7 +3,7 @@ chrome.runtime.onInstalled.addListener(() => {
     console.log("Extension installed!");
   });
   
-  chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.type === "sendKeywords") {
       console.log("Received keywords:", message.keywords);
       sendResponse({ status: "success" });
