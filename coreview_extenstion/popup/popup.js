@@ -2,7 +2,7 @@ document.getElementById("fast-btn").addEventListener("click", () => {
     fetchReviews(90);
   });
   
-  document.getElementById("slow-btn").addEventListener("click", () => {
+document.getElementById("slow-btn").addEventListener("click", () => {
     fetchReviews("all");
   });
   
