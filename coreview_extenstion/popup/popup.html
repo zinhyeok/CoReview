@@ -8,24 +8,31 @@
 </head>
 <body>
   <div id="app">
-    <img src="../images/logo.png" alt="Coreview Logo" class="logo">
-    <h2>리뷰의 본질을 한눈에.</h2>
-    <button id="fast-btn" class="action-btn">빠르게 리뷰 분석하기 <span>fast</span></button>
-    <button id="slow-btn" class="action-btn">꼼꼼하게 리뷰 분석하기 <span>slow</span></button>
-  </div>
-  <div id="loading" style="display: none;">
-    <div class="loading-animation">
-      <div></div><div></div><div></div><div></div>
+    <!-- Default Screen -->
+    <div id="default-screen">
+      <img src="../imgs/coreview_logo.png" alt="Coreview Logo" class="logo">
+      <h2>리뷰의 본질을 한눈에.</h2>
+      <button id="fast-btn" class="action-btn">빠르게 리뷰 분석하기 <span>fast</span></button>
+      <button id="slow-btn" class="action-btn">꼼꼼하게 리뷰 분석하기 <span>slow</span></button>
     </div>
-  </div>
-  <div id="keywords" style="display: none;">
-    <h3>키워드 카테고리</h3>
-    <div id="keyword-list"></div>
-    <button id="organize-btn" class="action-btn">키워드 위주로 리뷰 정리</button>
-  </div>
-  <div id="reviews" style="display: none;">
-    <h3>리뷰 정리 결과</h3>
-    <div id="review-list"></div>
+
+    <!-- Loading Screen -->
+    <div id="loading-screen" style="display: none;">
+      <img src="../images/loading.gif" alt="Loading" class="loading-icon">
+    </div>
+
+    <!-- Keywords Screen -->
+    <div id="keywords-screen" style="display: none;">
+      <h3>키워드 카테고리</h3>
+      <div id="keyword-list"></div>
+      <button id="organize-btn" class="action-btn">키워드 위주로 리뷰 정리</button>
+    </div>
+
+    <!-- Reviews Screen -->
+    <div id="reviews-screen" style="display: none;">
+      <h3>리뷰 정리 결과</h3>
+      <div id="review-list"></div>
+    </div>
   </div>
   <script src="popup.js"></script>
 </body>
