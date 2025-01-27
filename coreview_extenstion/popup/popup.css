@@ -5,7 +5,7 @@ body {
   }
   
   .logo {
-    width: 150px;
+    width: 180px;
     display: block;
     margin: 20px auto;
   }
@@ -16,25 +16,62 @@ body {
     color: #333;
   }
   
-  .action-btn {
+  .divider {
     width: 90%;
-    margin: 10px auto;
-    padding: 10px 15px;
     border: none;
-    border-radius: 5px;
-    color: white;
+    border-top: 1px solid #ddd;
+    margin: 15px auto;
+  }
+
+  .background-container {
+    position: relative;
+    width: 100%;
+    max-width: 400px;
+    margin: 0 auto;
+  }
+  
+  .background-image {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+  
+
+  .action-btn {
+    position: absolute;
+    width: 80%;
+    left: 10%;
+    padding: 12px;
+    border: 2px solid transparent;
+    border-radius: 25px;
     font-size: 16px;
-    background: #0056f9;
+    color: #ffffff;
+    font-weight: 600;
+    cursor: pointer;
+    text-align: center;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    cursor: pointer;
+    transition: all 0.3s;
   }
   
-  .action-btn span {
-    font-size: 12px;
-    color: #ddd;
+  .action-btn.fast {
+    top: 40%;
+    background: #0056f9;
   }
+  
+  .action-btn.slow {
+    top: 55%;
+    background: #ffffff;
+    color: #0056f9;
+    border: 2px solid #0056f9;
+  }
+  
+  /* 버튼 hover 효과 */
+  .action-btn:hover {
+    opacity: 0.9;
+  }
+
   
   .loading-animation {
     display: flex;
