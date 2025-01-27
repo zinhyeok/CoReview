@@ -1,6 +1,6 @@
 {
     "manifest_version": 3,
-    "name": "Shopping Review Summarizer",
+    "name": "Coreview",
     "version": "1.0",
     "permissions": ["activeTab", "scripting"],
     "host_permissions": ["<all_urls>"],
