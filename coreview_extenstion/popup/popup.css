@@ -75,6 +75,18 @@ h2 {
   opacity: 0.9;
 }
 
+/* laadoing screen*/
+#loading-screen {
+  display: flex;
+  justify-content: center; 
+  align-items: center; 
+}
+
+#loadingImg {
+  width: 213px; 
+  height: 208px;
+}
+
 .loading-animation {
   display: flex;
   justify-content: center;

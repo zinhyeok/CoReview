@@ -2,7 +2,7 @@
     "manifest_version": 3,
     "name": "Coreview",
     "version": "1.0",
-    "permissions": ["activeTab", "scripting"],
+    "permissions": ["tabs", "activeTab", "scripting"],
     "host_permissions": ["<all_urls>"],
     "action": {
       "default_popup": "popup/popup.html",
@@ -15,6 +15,12 @@
     },
     "background": {
       "service_worker": "background.js"
+    },
+    "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["scripts/content.js"]
     }
+    ]
   }
   

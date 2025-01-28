@@ -10,46 +10,52 @@
   </head>
   <body>
     <div id="app">
-      <!-- Default Screen -->
+      <!-- default Screen -->
       <div id="default-screen">
         <h2>리뷰의 본질을 한눈에,</h2>
         <img src="../imgs/coreview_logo.png" alt="Coreview Logo" class="logo" />
         <hr class="divider" />
-        <div class="background-container">
-          <img
-            src="../imgs/gray.png"
-            alt="Background"
-            class="background-image"
-          />
-          <button id="fast-btn" class="action-btn fast">
-            빠르게 리뷰 분석하기 <span>fast</span>
-          </button>
-          <button id="slow-btn" class="action-btn slow">
-            꼼꼼하게 리뷰 분석하기 <span>slow</span>
+
+        <!-- Start Screen -->
+        <div id="start-screen">
+          <div class="background-container">
+            <img
+              src="../imgs/gray.png"
+              alt="Background"
+              class="background-image"
+            />
+            <button id="fast-btn" class="action-btn fast">
+              빠르게 리뷰 분석하기 <span>fast</span>
+            </button>
+            <button id="slow-btn" class="action-btn slow">
+              꼼꼼하게 리뷰 분석하기 <span>slow</span>
+            </button>
+          </div>
+        </div>
+      
+        <!-- Loading Screen -->
+        <div id="loading-screen" style="display: none">
+          <img id="loadingImg" src="../imgs/loading.gif" alt="Loading" class="loading-icon" />
+        </div>
+
+
+        <!-- Keywords Screen -->
+        <div id="keywords-screen" style="display: none">
+          <h3>키워드 카테고리</h3>
+          <div id="keyword-list"></div>
+          <button id="organize-btn" class="action-btn">
+            키워드 위주로 리뷰 정리
           </button>
         </div>
-      </div>
-      
-      <!-- Loading Screen -->
-      <div id="loading-screen" style="display: none">
-        <img src="../images/loading.gif" alt="Loading" class="loading-icon" />
-      </div>
 
-
-      <!-- Keywords Screen -->
-      <div id="keywords-screen" style="display: none">
-        <h3>키워드 카테고리</h3>
-        <div id="keyword-list"></div>
-        <button id="organize-btn" class="action-btn">
-          키워드 위주로 리뷰 정리
-        </button>
+        <!-- Reviews Screen -->
+        <div id="reviews-screen" style="display: none">
+          <h3>리뷰 정리 결과</h3>
+          <div id="review-list"></div>
+        </div>
+    
       </div>
-
-      <!-- Reviews Screen -->
-      <div id="reviews-screen" style="display: none">
-        <h3>리뷰 정리 결과</h3>
-        <div id="review-list"></div>
-      </div>
+    <!-- default Screen -->
     </div>
     <script src="popup.js"></script>
   </body>
