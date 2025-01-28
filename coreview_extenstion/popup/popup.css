@@ -2,6 +2,8 @@ body {
   font-family: Arial, sans-serif;
   margin: 0;
   padding: 0;
+  width: 400px; /* 가로 크기 고정 */
+  height: 295px; /* 세로 크기 고정 */
 }
 
 .logo {
@@ -142,4 +144,57 @@ h3 {
   margin-bottom: 10px;
   padding: 10px;
   border-radius: 5px;
+}
+
+@media (max-width: 768px) {
+  .logo {
+    width: 120px;
+    margin-left: 5%;
+  }
+
+  h2 {
+    font-size: 9px;
+    margin-left: 5%;
+  }
+
+  .action-btn {
+    width: 90%;
+    left: 5%;
+    padding: 12px 20px;
+    font-size: 14px;
+  }
+
+  .action-btn.fast {
+    top: 22%;
+  }
+
+  .action-btn.slow {
+    top: 48%;
+  }
+}
+
+@media (max-width: 480px) {
+  .logo {
+    width: 100px;
+    margin-left: 5%;
+  }
+
+  h2 {
+    font-size: 8px;
+    margin-left: 5%;
+  }
+
+  .action-btn {
+    width: 80%;
+    left: 10%;
+    padding: 10px 18px;
+  }
+
+  .action-btn.fast {
+    top: 20%;
+  }
+
+  .action-btn.slow {
+    top: 50%;
+  }
 }
