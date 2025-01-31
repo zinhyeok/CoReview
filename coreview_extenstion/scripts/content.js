@@ -45,7 +45,8 @@
         }
 
         console.log(`✅ 총 ${allReviews.length}개의 리뷰를 수집했습니다.`);
-        saveJSON(allReviews);
+        // saveJSON(allReviews);
+        sendToFlask(allReviews)
     }
 
     function extractReviews() {
@@ -115,4 +116,31 @@
         document.body.removeChild(a);
         console.log("📁 JSON 파일 다운로드 완료!");
     }
+
+    //플라스크로 크롤링한 데이터 이동 content.js -->background.js가 중계역할 --> analyze.py 분석 결과 --> popup.js
+    async function sendToFlask(reviews) {
+        try {
+            let response = await fetch("http://localhost:8000/analyze", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ reviews: reviews })
+            });
+    
+            if (!response.ok) {
+                throw new Error(`서버 오류: ${response.status}`);
+            }
+    
+            let data = await response.json();
+            console.log("🔍 분석 결과:", data);
+    
+            // 분석 결과를 popup.js로 전송
+            chrome.runtime.sendMessage({ action: "showAnalysis", data: data });
+    
+        } catch (error) {
+            console.error("❌ Flask 서버 요청 실패:", error);
+        }
+    }    
+
 })();

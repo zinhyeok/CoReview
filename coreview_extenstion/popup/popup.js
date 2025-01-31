@@ -113,7 +113,32 @@ function downloadCSV(data) {
 
 
 
+async function sendToFlask(reviews) {
+  try {
+    let response = await fetch("http://localhost:8000/analyze", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ reviews: reviews })
+    });
 
+    if (!response.ok) {
+      throw new Error(`서버 오류: ${response.status}`);
+    }
+
+    let data = await response.json();
+    
+    // ✅ 분석 결과 콘솔 출력
+    console.log("🔍 분석 결과 저장 완료:", data);
+
+    // ✅ 결과를 `localStorage`에 저장
+    localStorage.setItem("analysisResults", JSON.stringify(data));
+
+  } catch (error) {
+    console.error("❌ Flask 서버 요청 실패:", error);
+  }
+}
 
 
 
