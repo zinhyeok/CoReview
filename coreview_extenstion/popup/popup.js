@@ -127,7 +127,14 @@ async function sendToFlask(reviews) {
 }
 
 
-
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  if (request.action === "displayAnalysisResults") {
+      console.log("📩 분석 결과 받음:", request.data);
+      // HTML 요소 업데이트 (예: 결과를 보여주는 div에 데이터 넣기)
+      document.getElementById("analysis-results").innerText = JSON.stringify(request.data, null, 2);
+      sendResponse({ success: true });
+  }
+});
 
 
 
