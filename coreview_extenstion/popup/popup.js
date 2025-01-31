@@ -8,9 +8,61 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
 
-  
+
+function preventPopupClose(event) {
+  if (crawlingInProgress) {
+    event.preventDefault();
+    event.returnValue = "작업이 진행 중입니다. 정말 닫으시겠습니까?";
+  }
+}
+
+function sendMessageToContentScript(limit, includeLowRatings) {
+  return new Promise((resolve, reject) => {
+    try {
+      chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
+        if (tabs.length === 0) {
+          reject("No active tab found");
+          return;
+        }
+
+        chrome.scripting.executeScript(
+          {
+            target: { tabId: tabs[0].id },
+            function: crawlReviews,
+            args: [limit, includeLowRatings]
+          },
+          result => {
+            if (chrome.runtime.lastError) {
+              reject(chrome.runtime.lastError.message);
+            } else {
+              resolve(result[0]?.result || []);
+            }
+          }
+        );
+      });
+    } catch (error) {
+      reject(error);
+    }
+  });
+}
+
+
+let crawlingInProgress = false;
+
 function startCrawling(limit, includeLowRatings) {
   showLoadingScreen();
+  window.addEventListener("beforeunload", preventPopupClose);
+
+  sendMessageToContentScript(limit, includeLowRatings)
+    .then(() => {
+      crawlingInProgress = false;
+      window.removeEventListener("beforeunload", preventPopupClose); // 크롤링 완료 후 이벤트 제거
+    })
+    .catch(error => {
+      console.error("크롤링 중 오류 발생:", error);
+      crawlingInProgress = false;
+      window.removeEventListener("beforeunload", preventPopupClose);
+    });
 }
 
 function showLoadingScreen() {
@@ -24,6 +76,24 @@ function showLoadingScreen() {
   setTimeout(() => {
     document.getElementById("loading-screen").style.opacity = "1";
   }, 0);
+}
+
+function sendMessageToContentScript() {
+  chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+    if (tabs.length === 0) return;
+
+    chrome.scripting.executeScript(
+      {
+        target: { tabId: tabs[0].id },
+        files: ["scripts/content.js"]
+      },
+      () => {
+        chrome.tabs.sendMessage(tabs[0].id, {
+          action: "startCrawling"
+        });
+      }
+    );
+  });
 }
 
 function downloadCSV(data) {
@@ -40,6 +110,22 @@ function downloadCSV(data) {
   link.click();
   document.body.removeChild(link);
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 // function displayKeywords(keywords) {
