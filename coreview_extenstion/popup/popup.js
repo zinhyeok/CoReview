@@ -16,36 +16,6 @@ function preventPopupClose(event) {
   }
 }
 
-function sendMessageToContentScript(limit, includeLowRatings) {
-  return new Promise((resolve, reject) => {
-    try {
-      chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
-        if (tabs.length === 0) {
-          reject("No active tab found");
-          return;
-        }
-
-        chrome.scripting.executeScript(
-          {
-            target: { tabId: tabs[0].id },
-            function: crawlReviews,
-            args: [limit, includeLowRatings]
-          },
-          result => {
-            if (chrome.runtime.lastError) {
-              reject(chrome.runtime.lastError.message);
-            } else {
-              resolve(result[0]?.result || []);
-            }
-          }
-        );
-      });
-    } catch (error) {
-      reject(error);
-    }
-  });
-}
-
 
 let crawlingInProgress = false;
 
@@ -65,6 +35,39 @@ function startCrawling(limit, includeLowRatings) {
     });
 }
 
+
+function sendMessageToContentScript(limit, includeLowRatings) {
+  return new Promise((resolve, reject) => {
+    try {
+      chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+        if (tabs.length === 0) {
+          reject("No active tab found");
+          return;
+        }
+
+        // content.js를 실행하는 코드
+        chrome.scripting.executeScript(
+          {
+            target: { tabId: tabs[0].id },
+            files: ["scripts/content.js"], // ✅ content.js를 실행
+          },
+          () => {
+            chrome.tabs.sendMessage(tabs[0].id, {
+              action: "startCrawling",
+              limit: limit,
+              includeLowRatings: includeLowRatings,
+            });
+            resolve();
+          }
+        );
+      });
+    } catch (error) {
+      reject(error);
+    }
+  });
+}
+
+
 function showLoadingScreen() {
   document.getElementById("start-screen").style.display = "none";
   // 미리 로드
@@ -78,23 +81,6 @@ function showLoadingScreen() {
   }, 0);
 }
 
-function sendMessageToContentScript() {
-  chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-    if (tabs.length === 0) return;
-
-    chrome.scripting.executeScript(
-      {
-        target: { tabId: tabs[0].id },
-        files: ["scripts/content.js"]
-      },
-      () => {
-        chrome.tabs.sendMessage(tabs[0].id, {
-          action: "startCrawling"
-        });
-      }
-    );
-  });
-}
 
 function downloadCSV(data) {
   const csvContent =
