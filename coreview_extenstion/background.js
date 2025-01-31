@@ -1,4 +1,3 @@
-// Background script to handle communication between content.js and popup
 // Background script to handle communication between content.js and popup.js
 chrome.runtime.onInstalled.addListener(() => {
   console.log("🚀 Extension installed!");

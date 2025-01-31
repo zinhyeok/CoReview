@@ -261,10 +261,6 @@ def filter_sentences(df, keywords, min_length=1, max_length=50000, num_samples=3
 
     return random.sample(filtered_sentences, min(num_samples, len(filtered_sentences))) if filtered_sentences else []
 
-def save_dict_to_json(dictionary, file_path):
-    with open(file_path, 'w', encoding='utf-8-sig') as json_file:
-        json.dump(dictionary, json_file, ensure_ascii=False, indent=4)
-
 def calculate_keyword_statistics(df, keyword_lists, review_column, rating_column):
     keyword_stats = {}
 
@@ -312,7 +308,7 @@ def analyze_reviews():
     ltokenizer = LTokenizer(scores=scores)
 
     # 리뷰 텍스트 전처리 수행
-    df['preprocessed_review'] = df["reviewContent"].apply(lambda x: ' '.join([word for word in okt.nouns(x) if word not in stopwords_lst]))
+    df['preprocessed_review'] = preprocessing(df, review_column='reviewContent', istokenize=False)
 
     # KRWordRank를 사용하여 키워드 추출
     full_merge_df = df_krwordRank(df, review_col='preprocessed_review', stopwords=stopwords_lst, top_k=150, full_merge=True)
@@ -354,7 +350,7 @@ def analyze_reviews():
             "count": keyword_stats_adj[keyword]["count"],
             "examples": filter_sentences(df, [keyword], min_length=1, max_length=8000, num_samples=3)
         }
-        for keyword in list(keyword_stats_adj.keys())[:10]  # 상위 10개만 선택
+        for keyword in list(keyword_stats_adj.keys())  # 상위 10개만 선택
     }
 
     return jsonify({"nouns": noun_result, "adjectives": adj_result})
