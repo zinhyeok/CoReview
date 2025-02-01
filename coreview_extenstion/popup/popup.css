@@ -2,8 +2,9 @@ body {
   font-family: Arial, sans-serif;
   margin: 0;
   padding: 0;
-  width: 400px; /* 가로 크기 고정 */
-  height: 295px; /* 세로 크기 고정 */
+  width: 400px;
+  height: 295px;
+  overflow: hidden;
 }
 
 .logo {
@@ -130,25 +131,39 @@ h3 {
   text-align: center;
 }
 
-#keyword-list {
+#keyword-categories {
   display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  margin: 10px 0;
+  justify-content: space-between;
+  padding: 10px;
+  margin-top: 20px;
 }
 
-.keyword {
-  padding: 8px 10px;
-  background: #f0f0f0;
-  margin: 5px;
-  border-radius: 5px;
-  cursor: pointer;
+.category-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+}
+
+.category-title {
+  font-size: 14px;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.vertical-divider {
+  width: 1px;
+  background-color: #ddd;
+  margin: 0 15px;
 }
 
 .keyword-list {
   display: flex;
-  flex-wrap: wrap;
+  overflow-x: auto;
   gap: 10px;
+  padding: 10px;
+  max-width: 100%;
 }
 
 .keyword-item {
@@ -159,16 +174,47 @@ h3 {
   font-weight: bold;
   color: #333;
   cursor: pointer;
+  white-space: nowrap;
+}
+
+.keyword-item span {
+  color: #0056f9;
+  font-weight: bold;
+  margin-left: 5px;
 }
 
 .keyword-item:hover {
   background-color: #d9e3f0;
 }
 
-
-.keyword.selected {
+.keyword-item.selected {
   background: #0056f9;
   color: white;
+}
+
+#selected-keywords {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 10px;
+}
+
+.selected-keyword {
+  padding: 8px 12px;
+  background-color: #0056f9;
+  color: white;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.remove-btn {
+  background: none;
+  border: none;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
 }
 
 #review-list .review-item {
@@ -197,11 +243,6 @@ h3 {
 .action-btn.retry {
   background: #4167d9;
 }
-
-
-
-
-
 
 @media (max-width: 768px) {
   .logo {
@@ -232,6 +273,12 @@ h3 {
   .action-btn.retry {
     top: 48%;
   }
+
+  .keyword-list {
+    gap: 5px;
+    padding: 5px;
+    max-width: 100%;
+  }
 }
 
 @media (max-width: 480px) {
@@ -261,5 +308,15 @@ h3 {
 
   .action-btn.retry {
     top: 50%;
+  }
+
+  .keyword-item {
+    font-size: 12px;
+    padding: 8px 12px;
+  }
+
+  .keyword-list {
+    gap: 5px;
+    padding: 5px;
   }
 }

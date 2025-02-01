@@ -60,7 +60,6 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     default:
       sendResponse({ success: false, error: "알 수 없는 액션입니다." });
   }
-
   // 비동기 응답을 보장하기 위해 true 반환
   return true;
 });

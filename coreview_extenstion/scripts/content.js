@@ -37,7 +37,7 @@
             // 페이지가 변경될 때까지 대기 (최대 10초)
             let pageChanged = await waitForPageChange(previousPageContent, 10);
             if (!pageChanged) {
-                console.warn("⚠️ 페이지 로딩 실패! → 크롤링 종료");
+                console.log("⚠️ 페이지 로딩 실패! → 크롤링 종료");
                 break;
             }
 

@@ -1,3 +1,5 @@
+var selectedKeywords = new Set(); // 선택된 키워드를 관리할 Set
+
 document.addEventListener("DOMContentLoaded", () => {
   
   chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
@@ -174,38 +176,105 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       changeState("keywords-screen")
       //HTML 요소 업데이트 필요
       // document.getElementById("analysis-results").innerText = JSON.stringify(request.data, null, 2);
-      const jsonData = JSON.stringify(request.data, null, 2);
+      let jsonData = JSON.stringify(request.data, null, 2);
+      jsonData = {
+        "adjectives": {
+            "아쉬": {
+                "count": 3,
+                "examples": [
+                    "전반적으로 만족스러운 제품이었지만, 몇 가지 아쉬운 점도 있었습니다.#### 장점1.",
+                    "뿌리를 넣기에는 공간이 부족해 식물의 건강에 영향을 줄 수 있을 것 같아 아쉬웠습니다.2. **관리의 번거로움**: 수경재배식물 특성상 물을 자주 갈아줘야 하는데, 유리병의 디자인 때문에 물을 붓는 것이 다소 불편했습니다.#### 종합적인 평가전체적으로 1+1 수경재배식물 테이블야자와 스파트필름 모던글라스 세트는 디자인과 가격 면에서 매우 만족스러운 선택이었습니다.",
+                    "조금 아쉬웠어요"
+                ],
+                "rating": 3.67
+            },
+            "예쁘": {
+                "count": 4,
+                "examples": [
+                    "화병하나입구 쪽이 깨져서 왔네요.교환하기도 귀찮네요.그리고 테이블야자가 시들어 왔어요예쁘질 않네요.",
+                    "모종상태좋아요!플라스틱 모종 화분에 배송이됩니다.스노우 사파이어는 뿌리도 깔끔하고 깨끗해서배송되어온 유리병+ 흰자갈 이용해서수경재배 하기로 결정!!(원래가 수경재배 키트인데..;;^^)스마트 필름은 생각보다 모종이 큰거 같아서,토분에 옮겨 심었습니다!계속 꽃이 자라는 수종이어서, 키우는 재미가 있죠!옮겨심으니까 예쁘네요~~~!!❤️여기 모종, 뿌리도 싱싱하고 괜찮네요!스노우 사파이어 일주일만에 금방 새잎이 돋았어요~!수경재배 키트도 깔끔하고요~!배송당시 상태도 좋았습니다.최대한 식물이 다치지 않게 포장 잘해주셨더라구요!잘 키워볼게요❤️",
+                    "작아요.백자갈량이 작아서 식물이 잘지지되지 않으니 모양도 예쁘지 않네요.그래도 식물은 나름 싱싱하네요."
+                ],
+                "rating": 4.25
+            },
+        },
+        "nouns": {
+            "마음": {
+                "count": 4,
+                "examples": [
+                    "묘처럼 기분전환 했네요~가끔씩 공허할때 식물보고있음마음이편안해지더라고요~~이상하게도 제가 똥손?이서인지~저에게힘링이되는식물들이잘돌봐줘도자꾸 죽게되는이유는뭘까요?ㅜㅜ수경이라 잘키울수있겠지?하는마음으로 구입했어요우선 아담싸이즈로 잎도풍성하고요~~아주맘에들어하네요 사진보시면 아시겠지만 푸릇푸릇하니~~내맘도푸릇푸릇 힐링되네요참~~~ 포장아이들다치지않게 신문지로 안전하게포장되어 왔어요^^",
+                    "한번 구매하고 너무 마음에 들어서 다음날 바로 재구매했어요.",
+                    "포장 벗길때까지 마음을 많이 졸였어요 또 잘못되었을까봐요걱정과 달리 좋은 아가들이 왔네요신경써주시고~~ 넘넘 감사합니다 고객 응대 해주실때도 잘 들어주시고 제가 했던말을 여러번 한것  같은데도 친절하게 다 받아주셨어요 보내주신 몬스테라 잘 키울께요~~~"
+                ],
+                "rating": 5
+            },
+            "배송": {
+                "count": 8,
+                "examples": [
+                    "**신선한 식물**: 배송된 테이블야자는 매우 싱싱했습니다.",
+                    "배송 롯데택배 배송으로 문제없이 도착2.",
+                    "모두 좋은 상태로 배송이 되었는데한종류만 유독 살아나지 못하고 썩어버리네요."
+                ],
+                "rating": 4.75
+            },
+            "뿌리": {
+                "count": 12,
+                "examples": [
+                    "모종상태좋아요!플라스틱 모종 화분에 배송이됩니다.스노우 사파이어는 뿌리도 깔끔하고 깨끗해서배송되어온 유리병+ 흰자갈 이용해서수경재배 하기로 결정!!(원래가 수경재배 키트인데..;;^^)스마트 필름은 생각보다 모종이 큰거 같아서,토분에 옮겨 심었습니다!계속 꽃이 자라는 수종이어서, 키우는 재미가 있죠!옮겨심으니까 예쁘네요~~~!!❤️여기 모종, 뿌리도 싱싱하고 괜찮네요!스노우 사파이어 일주일만에 금방 새잎이 돋았어요~!수경재배 키트도 깔끔하고요~!배송당시 상태도 좋았습니다.최대한 식물이 다치지 않게 포장 잘해주셨더라구요!잘 키워볼게요❤️",
+                    "ㅎㅎㅎ ㅎㅎ저희집 다른 식물과도 잘 어울려요~강추입니다.사용후기6개월이 지난 지금 물속에 있는 뿌리가 썩내요...그래서 다 죽고 테이블야자만 반절 남았네요 ㅎㅎ제가 잘 못 키우는 건가 싶기도 하구요..",
+                    "스킨답서스는 뿌리가 진짜 촘촘하고 많더라구요."
+                ],
+                "rating": 4
+            },
+            "상태": {
+                "count": 10,
+                "examples": [
+                    "모종상태좋아요!플라스틱 모종 화분에 배송이됩니다.스노우 사파이어는 뿌리도 깔끔하고 깨끗해서배송되어온 유리병+ 흰자갈 이용해서수경재배 하기로 결정!!(원래가 수경재배 키트인데..;;^^)스마트 필름은 생각보다 모종이 큰거 같아서,토분에 옮겨 심었습니다!계속 꽃이 자라는 수종이어서, 키우는 재미가 있죠!옮겨심으니까 예쁘네요~~~!!❤️여기 모종, 뿌리도 싱싱하고 괜찮네요!스노우 사파이어 일주일만에 금방 새잎이 돋았어요~!수경재배 키트도 깔끔하고요~!배송당시 상태도 좋았습니다.최대한 식물이 다치지 않게 포장 잘해주셨더라구요!잘 키워볼게요❤️",
+                    "식물 상태는 좋아요.",
+                    "테이블 야자만 상태가 양호하고 스마트필름은 얼은것 같은 잎상태로 왔어요 잎이 반정도 안좋네요2주전쯤 다른곳에 주문한 스마트필름은 상태가 좋은걸로 왔는데 상품받고서는 놀랬어요 상태가 너무 안좋아서요겨울철에는 주문하면 안되는 식물인가봐요많이 속상하네요처음 보낼땐 안그랬을것 같은데 배송중에 문제가 생긴듯 합니다 원래대로라면 화요일에 와야하는데 월요일에 도착했어요문제는 제 물건이 토요일날 제가 사는 지역에 오전일찍 도착한걸로 떴어요 물품이 추운곳에 보관된듯 해요 업주께서누 배송시스템을 바꾸셔야 할듯 싶어요고객이 주문하면 하루다음날 바로 받을수 있게요 우선 저는 이것말고도 다른것도 주문했는데.."
+                ],
+                "rating": 4.5
+            },
+            "포장": {
+                "count": 11,
+                "examples": [
+                    "포장도 꼼꼼하게 잘해서 만족합니다.잘키워보겠습니다.감사합니다 ~",
+                    "포장이 꼼꼼하게 되어 식물들이 싱싱하게 잘 배송 되었어요 잘키워 볼게요",
+                    "식물들 싱싱하고 꼼꼼히 포장해주십니다."
+                ],
+                "rating": 4.73
+            }
+        }
+    };
       initKeywordScreenEvents(jsonData);
-      // displayReviews(request.data.reviews);
       sendResponse({ success: true });
   }
 });
 
 function initKeywordScreenEvents(jsonData) {
-  const selectedKeywords = new Set(); // 선택된 키워드를 관리할 Set
   const organizeBtn = document.getElementById("organize-btn");
-  
-  renderKeywordCategories(jsonData, selectedKeywords);
+  console.log(`➡️ 🚀${jsonData} 이동 중...🚀`);
+  renderKeywordCategories(jsonData);
   //btn 클릭시 상세 리뷰 정리
   organizeBtn.addEventListener("click", () => {
-    renderReviews(jsonData, selectedKeywords);
+    renderReviews(jsonData);
   });
 }
 
 //rendering json respond
-function renderKeywordCategories(data, selectedKeywords) {
+function renderKeywordCategories(data) {
   const container = document.getElementById("keyword-categories");
   container.innerHTML = ""; // 기존 내용을 초기화
   // 형용사 키워드 섹션 추가
-  const adjectiveSection = createCategorySection("반응", data.adjectives, selectedKeywords);
+  const adjectiveSection = createCategorySection("반응", data.adjectives);
   container.appendChild(adjectiveSection);
 
   // 명사 키워드 섹션 추가
-  const nounSection = createCategorySection("특징", data.nouns, selectedKeywords);
+  const nounSection = createCategorySection("특징", data.nouns);
   container.appendChild(nounSection);
 }
 
-function createCategorySection(title, keywords, selectedKeywords) {
+function createCategorySection(title, keywords) {
   const section = document.createElement("div");
   section.className = "category-section";
 
@@ -221,7 +290,7 @@ function createCategorySection(title, keywords, selectedKeywords) {
     keywordItem.className = "keyword-item";
     keywordItem.innerHTML = `${keyword} <span>(${details.count})</span>`;
 
-    keywordItem.addEventListener("click", () => toggleKeywordSelection(keyword, keywordItem, selectedKeywords));
+    keywordItem.addEventListener("click", () => toggleKeywordSelection(keyword, keywordItem));
     keywordList.appendChild(keywordItem);
   }
 
@@ -229,30 +298,40 @@ function createCategorySection(title, keywords, selectedKeywords) {
   return section;
 }
 
-function toggleKeywordSelection(keyword, keywordItem, selectedKeywords) {
+function toggleKeywordSelection(keyword, keywordItem) {
   if (selectedKeywords.has(keyword)) {
     selectedKeywords.delete(keyword);
     keywordItem.classList.remove("selected");
-    removeKeyword(keyword, selectedKeywords);
+    removeKeyword(keyword);
   } else {
     selectedKeywords.add(keyword);
     keywordItem.classList.add("selected");
-    addKeyword(keyword, selectedKeywords);
+    addKeyword(keyword);
   }
 
-  updateOrganizeButtonState(selectedKeywords);
+  updateOrganizeButtonState();
 }
 
-function addKeyword(keyword, selectedKeywords) {
+function addKeyword(keyword) {
   const keywordElement = document.createElement("div");
   const selectedContainer = document.getElementById("selected-keywords");
 
   keywordElement.className = "selected-keyword";
   keywordElement.innerHTML = `${keyword} <button class="remove-btn">X</button>`;
 
+  // 이벤트 리스너 등록
   keywordElement.querySelector(".remove-btn").addEventListener("click", () => {
     selectedKeywords.delete(keyword);
-    document.querySelector(`.keyword-item.selected:contains('${keyword}')`).classList.remove("selected");
+    
+    // `.keyword-item.selected` 요소 중에서 키워드가 포함된 요소 찾기
+    const keywordItems = document.querySelectorAll(".keyword-item.selected");
+    keywordItems.forEach((item) => {
+      if (item.textContent.includes(keyword)) {
+        item.classList.remove("selected");
+      }
+    });
+
+    // 선택된 키워드 요소 제거
     keywordElement.remove();
     updateOrganizeButtonState();
   });
@@ -260,13 +339,26 @@ function addKeyword(keyword, selectedKeywords) {
   selectedContainer.appendChild(keywordElement);
 }
 
-function removeKeyword(keyword, selectedKeywords) {
+
+function removeKeyword(keyword) {
   const selectedContainer = document.getElementById("selected-keywords");
-  const keywordElement = selectedContainer.querySelector(`.selected-keyword:contains('${keyword}')`);
-  if (keywordElement) keywordElement.remove();
+  const keywordElements = document.querySelectorAll(".keyword-item.selected");
+
+  // 요소 중에서 텍스트가 해당 키워드와 일치하는 것을 찾아 제거
+  keywordElements.forEach((element) => {
+    if (element.textContent.trim().startsWith(keyword)) {
+      element.classList.remove("selected");
+    }
+  });
+
+  const keywordElement = selectedContainer.querySelector(`.selected-keyword`);
+  if (keywordElement && keywordElement.textContent.includes(keyword)) {
+    keywordElement.remove();
+  }
 }
 
-function updateOrganizeButtonState(selectedKeywords) {
+function updateOrganizeButtonState() {
+  const organizeBtn = document.getElementById("organize-btn");
   if (selectedKeywords.size > 0) {
     organizeBtn.classList.add("active");
     organizeBtn.disabled = false;
@@ -276,8 +368,9 @@ function updateOrganizeButtonState(selectedKeywords) {
   }
 }
 
-function renderReviews(data, keywords) {
+function renderReviews(data) {
   const reviewsContainer = document.getElementById("review-list");
+  keywords = Array.from(selectedKeywords);
   reviewsContainer.innerHTML = ""; // 기존 리뷰 초기화
   keywords.forEach((keyword) => {
     if (data.adjectives[keyword]) {
