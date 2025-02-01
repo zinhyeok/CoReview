@@ -140,6 +140,10 @@
     
         } catch (error) {
             console.error("❌ Flask 서버 요청 실패:", error);
+            // 실패 데이터 저장 요청
+            chrome.runtime.sendMessage({ action: "saveFailedData", data: reviews });
+            // 에러 페이지 표시 요청
+            chrome.runtime.sendMessage({ action: "showErrorPage" });
         }
     }    
 

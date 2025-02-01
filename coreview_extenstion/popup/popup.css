@@ -145,6 +145,27 @@ h3 {
   cursor: pointer;
 }
 
+.keyword-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.keyword-item {
+  padding: 10px 15px;
+  background-color: #eef2f7;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: bold;
+  color: #333;
+  cursor: pointer;
+}
+
+.keyword-item:hover {
+  background-color: #d9e3f0;
+}
+
+
 .keyword.selected {
   background: #0056f9;
   color: white;

@@ -17,7 +17,7 @@
         <hr class="divider" />
 
         <!-- Start Screen -->
-        <div id="start-screen", style="display: none">
+        <div id="start-screen", style="display: block">
           <div class="background-container">
             <img
               src="../imgs/gray.png"
@@ -39,24 +39,19 @@
         </div>
 
         <!-- Keywords Screen -->
-        <div id="keywords-screen" style="display: block">
+        <div id="keywords-screen" style="display: none">
           <h3>키워드 카테고리</h3>
           <!--Keywords Categroy 렌더링 대상-->
           <div id="keyword-categories"></div>
           <!-- User input -->
           <!-- <input type="text" id="custom-keyword" placeholder="키워드를 입력하세요"> -->
           <div id="selected-keywords"></div>
-          <button id="organize-btn" class="action-btn">키워드 위주로 리뷰 정리</button>
+          <button id="organize-btn" class="action-btn disabled">키워드 위주로 리뷰 정리</button>
           
           <!-- Review Result Screen -->
-          <div id="reviews-screen" style="display: block"> 
-            
+          <div id="reviews-screen"> 
             <!-- Loading for keyword -->
-            <div id="loading-reviews" style="display: none">
-              <img id="loadingImg" src="../imgs/loading.gif" alt="Loading" class="loading-icon" />
-            </div>
-            
-            <div id="selected-reviews" style="display: none;">
+            <div id="selected-reviews">
               <div id="review-list"></div>
             </div>
 

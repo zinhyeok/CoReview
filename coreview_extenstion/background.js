@@ -5,6 +5,7 @@ chrome.runtime.onInstalled.addListener(() => {
 
 // 탭별 실행상태 저장
 let tabStates = {};
+let failedReviewData = {};  // json 통신 실패 시 저장 
 
 // 메시지 처리 리스너 크롤링과 통합
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
@@ -40,6 +41,20 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         data: request.data,
       });
       sendResponse({ success: true, message: "결과 전달 완료" });
+      break;
+
+      case "saveFailedData":
+        failedReviewData[tabId] = request.data;
+        console.log("❌ 전송 실패 데이터 저장:", request.data);
+        sendResponse({ success: true });
+        break;
+  
+    case "retrySendData":
+      if (failedReviewData[tabId]) {
+        chrome.runtime.sendMessage({ action: "retrySendData", data: failedReviewData[tabId] });
+      } else {
+        sendResponse({ success: false, message: "재전송할 데이터가 없습니다." });
+      }
       break;
 
     default:
