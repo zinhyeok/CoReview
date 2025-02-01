@@ -17,7 +17,7 @@
         <hr class="divider" />
 
         <!-- Start Screen -->
-        <div id="start-screen">
+        <div id="start-screen", style="display: none">
           <div class="background-container">
             <img
               src="../imgs/gray.png"
@@ -38,25 +38,36 @@
           <img id="loadingImg" src="../imgs/loading.gif" alt="Loading" class="loading-icon" />
         </div>
 
-
         <!-- Keywords Screen -->
-        <div id="keywords-screen" style="display: none">
+        <div id="keywords-screen" style="display: block">
           <h3>키워드 카테고리</h3>
-          <div id="keyword-list"></div>
-          <button id="organize-btn" class="action-btn">
-            키워드 위주로 리뷰 정리
-          </button>
-        </div>
+          <!--Keywords Categroy -->
+          <div id="keyword-categories"></div>
+          <!-- User input -->
+          <input type="text" id="custom-keyword" placeholder="키워드를 입력하세요">
+          <div id="selected-keywords"></div>
+          <button id="organize-btn" class="action-btn">키워드 위주로 리뷰 정리</button>
+          
+          <!-- Review Result Screen -->
+          <div id="reviews-screen" style="display: block"> 
+            
+            <!-- Loading for keyword -->
+            <div id="loading-keyword" style="display: none">
+              <img id="loadingImg" src="../imgs/loading.gif" alt="Loading" class="loading-icon" />
+            </div>
+            
+            <div id="selected-reviews" style="display: none;">
+              <div id="review-list"></div>
+            </div>
 
-        <!-- Reviews Screen -->
-        <div id="reviews-screen" style="display: none">
-          <h3>리뷰 정리 결과</h3>
-          <div id="review-list"></div>
+          </div>
+        
         </div>
-    
+        <!-- keyuwords screen end -->
       </div>
-    <!-- default Screen -->
+    <!-- default Screen end-->
     </div>
+    <!-- app end -->
     <script src="popup.js"></script>
   </body>
 </html>
