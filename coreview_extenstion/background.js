@@ -3,38 +3,57 @@ chrome.runtime.onInstalled.addListener(() => {
   console.log("🚀 Extension installed!");
 });
 
-// 메시지 리스너 추가 (content.js → popup.js 데이터 전달)
+// 탭별 실행상태 저장
+let tabStates = {};
+
+// 메시지 처리 리스너 크롤링과 통합
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  if (!request || !request.action) {
-      console.error("❌ 잘못된 요청:", request);
-      sendResponse({ success: false, message: "잘못된 요청입니다." });
-      return;
+  const tabId = request.tabId || (sender.tab ? sender.tab.id : null);
+
+  if (!tabId) {
+    sendResponse({ success: false, error: "Tab ID가 없습니다." });
+    return true;
   }
 
-  console.log("📩 백그라운드에서 메시지 받음:", request);
+  console.log("📩 메시지 수신:", request);
 
-  // 크롤링 시작 요청 처리
-  if (request.action === "startCrawling") {
+  switch (request.action) {
+    case "getState":
+      sendResponse({ state: tabStates[tabId] || "start-screen" });
+      break;
+
+    case "setState":
+      tabStates[tabId] = request.state;
+      console.log(`✅ 탭 ${tabId}의 상태가 저장되었습니다:`, request.state);
+      sendResponse({ success: true });
+      break;
+
+    case "startCrawling":
       console.log("🔄 크롤링 시작...");
       sendResponse({ success: true, message: "크롤링을 시작합니다." });
+      break;
+
+    case "showAnalysis":
+      console.log("📨 분석 결과 popup.js로 전송...");
+      chrome.runtime.sendMessage({
+        action: "displayAnalysisResults",
+        data: request.data,
+      });
+      sendResponse({ success: true, message: "결과 전달 완료" });
+      break;
+
+    default:
+      sendResponse({ success: false, error: "알 수 없는 액션입니다." });
   }
 
-  // Flask 분석 완료 후 popup.js로 전송
-  else if (request.action === "showAnalysis") {
-      console.log("📨 분석 결과 popup.js로 전송...");
-      
-      chrome.runtime.sendMessage({
-          action: "displayAnalysisResults",
-          data: request.data
-      });
+  // 비동기 응답을 보장하기 위해 true 반환
+  return true;
+});
 
-      sendResponse({ success: true, message: "결과 전달 완료" });
+// 탭이 닫힐 때 상태 제거
+chrome.tabs.onRemoved.addListener((tabId) => {
+  if (tabStates[tabId]) {
+    delete tabStates[tabId];
+    console.log(`🗑️ 탭 ${tabId}의 상태가 제거되었습니다.`);
   }
 });
-// chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-//     if (message.type === "sendKeywords") {
-//       console.log("Received keywords:", message.keywords);
-//       sendResponse({ status: "success" });
-//     }
-//   });
-  

@@ -24,6 +24,7 @@ result/
 *.tax2010
 *.vcf
 *.xml
+*.zip
 
 ###Key###
 key/

@@ -1,37 +1,100 @@
 document.addEventListener("DOMContentLoaded", () => {
+  chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+    if (tabs.length > 0) {
+      const tabId = tabs[0].id;
+      chrome.runtime.sendMessage({ action: "getState", tabId: tabId }, (response) => {
+        if (response && response.state) {
+          currentState = response.state;
+          changeState(currentState);
+        } else {
+          console.warn("❌ 상태를 복원할 수 없습니다. 기본 상태로 설정합니다.");
+          response.state = "start-screen";
+          changeState("start-screen");
+        }
+        });
+      }
+    });
+
   document.getElementById("fast-btn").addEventListener("click", () => {
     startCrawling(90, true);
+    changeState("loading-screen");
   });
 
   document.getElementById("slow-btn").addEventListener("click", () => {
     startCrawling(Infinity, false);
+    changeState("loading-screen");
+  });
+
+  document.getElementById("organize-btn").addEventListener("click", () => {
+    showReviewState("loading-keyword");
+
+    // 키워드 선택 후 크롤링 요청 및 서버 응답 대기
+    chrome.runtime.sendMessage({ action: "startKeywordAnalysis" });
+  });
+});
+
+function saveState(state) {
+  chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+    if (tabs.length > 0) {
+      const tabId = tabs[0].id;
+      // 탭 ID와 상태를 함께 전송
+      chrome.runtime.sendMessage({ action: "setState", tabId: tabId, state: state }, (response) => {
+        if (response.success) {
+          console.log("✅ 상태가 성공적으로 저장되었습니다.");
+        } else {
+          console.error("❌ 상태 저장 실패:", response.error);
+        }
+      });
+    }
+  });
+}
+
+function changeState(state) {
+  currentState = state;
+  saveState(state);
+
+  // 모든 화면 숨기기
+  document.getElementById("start-screen").style.display = "none";
+  document.getElementById("loading-screen").style.display = "none";
+  document.getElementById("keywords-screen").style.display = "none";
+
+  // 상태에 따라 적절한 화면 표시
+  document.getElementById(state).style.display = "block";
+
+  if (state === "keywords-screen") {
+    showReviewState("loading-keyword"); // 초기 상태로 설정
+  }
+}
+
+function showReviewState(reviewState) {
+  document.getElementById("loading-keyword").style.display = "none";
+  document.getElementById("selected-reviews").style.display = "none";
+
+  if (reviewState === "loading-keyword") {
+    document.getElementById("loading-keyword").style.display = "block";
+  } else if (reviewState === "selected-reviews") {
+    document.getElementById("selected-reviews").style.display = "block";
+  }
+}
+
+document.getElementById("organize-btn").addEventListener("click", () => {
+  showReviewState("loading-keyword");
+  // 서버에서 데이터를 받아온 후 상태 변경
+  fetchReviewsByKeywords().then(() => {
+    showReviewState("selected-reviews");
   });
 });
 
 
-function preventPopupClose(event) {
-  if (crawlingInProgress) {
-    event.preventDefault();
-    event.returnValue = "작업이 진행 중입니다. 정말 닫으시겠습니까?";
-  }
-}
-
-
-let crawlingInProgress = false;
-
 function startCrawling(limit, includeLowRatings) {
   showLoadingScreen();
-  window.addEventListener("beforeunload", preventPopupClose);
 
   sendMessageToContentScript(limit, includeLowRatings)
     .then(() => {
-      crawlingInProgress = false;
-      window.removeEventListener("beforeunload", preventPopupClose); // 크롤링 완료 후 이벤트 제거
+      console.log('크롤링 완료')
     })
     .catch(error => {
       console.error("크롤링 중 오류 발생:", error);
-      crawlingInProgress = false;
-      window.removeEventListener("beforeunload", preventPopupClose);
     });
 }
 
@@ -129,9 +192,10 @@ async function sendToFlask(reviews) {
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === "displayAnalysisResults") {
-      console.log("📩 분석 결과 받음:", request.data);
-      // HTML 요소 업데이트 (예: 결과를 보여주는 div에 데이터 넣기)
+      showReviewState("selected-reviews");
+      //HTML 요소 업데이트 필요
       document.getElementById("analysis-results").innerText = JSON.stringify(request.data, null, 2);
+      // displayReviews(request.data.reviews);
       sendResponse({ success: true });
   }
 });
