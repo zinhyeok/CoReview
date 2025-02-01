@@ -16,36 +16,6 @@ function preventPopupClose(event) {
   }
 }
 
-function sendMessageToContentScript(limit, includeLowRatings) {
-  return new Promise((resolve, reject) => {
-    try {
-      chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
-        if (tabs.length === 0) {
-          reject("No active tab found");
-          return;
-        }
-
-        chrome.scripting.executeScript(
-          {
-            target: { tabId: tabs[0].id },
-            function: crawlReviews,
-            args: [limit, includeLowRatings]
-          },
-          result => {
-            if (chrome.runtime.lastError) {
-              reject(chrome.runtime.lastError.message);
-            } else {
-              resolve(result[0]?.result || []);
-            }
-          }
-        );
-      });
-    } catch (error) {
-      reject(error);
-    }
-  });
-}
-
 
 let crawlingInProgress = false;
 
@@ -65,6 +35,39 @@ function startCrawling(limit, includeLowRatings) {
     });
 }
 
+
+function sendMessageToContentScript(limit, includeLowRatings) {
+  return new Promise((resolve, reject) => {
+    try {
+      chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+        if (tabs.length === 0) {
+          reject("No active tab found");
+          return;
+        }
+
+        // content.js를 실행하는 코드
+        chrome.scripting.executeScript(
+          {
+            target: { tabId: tabs[0].id },
+            files: ["scripts/content.js"], // ✅ content.js를 실행
+          },
+          () => {
+            chrome.tabs.sendMessage(tabs[0].id, {
+              action: "startCrawling",
+              limit: limit,
+              includeLowRatings: includeLowRatings,
+            });
+            resolve();
+          }
+        );
+      });
+    } catch (error) {
+      reject(error);
+    }
+  });
+}
+
+
 function showLoadingScreen() {
   document.getElementById("start-screen").style.display = "none";
   // 미리 로드
@@ -78,23 +81,6 @@ function showLoadingScreen() {
   }, 0);
 }
 
-function sendMessageToContentScript() {
-  chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-    if (tabs.length === 0) return;
-
-    chrome.scripting.executeScript(
-      {
-        target: { tabId: tabs[0].id },
-        files: ["scripts/content.js"]
-      },
-      () => {
-        chrome.tabs.sendMessage(tabs[0].id, {
-          action: "startCrawling"
-        });
-      }
-    );
-  });
-}
 
 function downloadCSV(data) {
   const csvContent =
@@ -113,10 +99,42 @@ function downloadCSV(data) {
 
 
 
+async function sendToFlask(reviews) {
+  try {
+    let response = await fetch("http://localhost:8000/analyze", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ reviews: reviews })
+    });
+
+    if (!response.ok) {
+      throw new Error(`서버 오류: ${response.status}`);
+    }
+
+    let data = await response.json();
+    
+    // ✅ 분석 결과 콘솔 출력
+    console.log("🔍 분석 결과 저장 완료:", data);
+
+    // ✅ 결과를 `localStorage`에 저장
+    localStorage.setItem("analysisResults", JSON.stringify(data));
+
+  } catch (error) {
+    console.error("❌ Flask 서버 요청 실패:", error);
+  }
+}
 
 
-
-
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  if (request.action === "displayAnalysisResults") {
+      console.log("📩 분석 결과 받음:", request.data);
+      // HTML 요소 업데이트 (예: 결과를 보여주는 div에 데이터 넣기)
+      document.getElementById("analysis-results").innerText = JSON.stringify(request.data, null, 2);
+      sendResponse({ success: true });
+  }
+});
 
 
 
