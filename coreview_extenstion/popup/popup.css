@@ -158,7 +158,24 @@ h3 {
   border-radius: 5px;
 }
 
+#error-screen {
+  text-align: center;
+  background: white;
+  padding: 40px;
+  border-radius: 12px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  width: 400px;
+  max-width: 90%;
+}
 
+.error-icon img {
+  width: 80px;
+  margin-bottom: 20px;
+}
+
+.action-btn.retry {
+  background: #4167d9;
+}
 
 
 
@@ -190,6 +207,10 @@ h3 {
   .action-btn.slow {
     top: 48%;
   }
+
+  .action-btn.retry {
+    top: 48%;
+  }
 }
 
 @media (max-width: 480px) {
@@ -214,6 +235,10 @@ h3 {
   }
 
   .action-btn.slow {
+    top: 50%;
+  }
+
+  .action-btn.retry {
     top: 50%;
   }
 }

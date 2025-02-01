@@ -189,17 +189,73 @@ async function sendToFlask(reviews) {
   }
 }
 
-
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === "displayAnalysisResults") {
       showReviewState("selected-reviews");
       //HTML 요소 업데이트 필요
       document.getElementById("analysis-results").innerText = JSON.stringify(request.data, null, 2);
+      const jsonData = JSON.stringify(request.data, null, 2);
+      renderKeywordCategories(jsonData);
       // displayReviews(request.data.reviews);
       sendResponse({ success: true });
   }
 });
 
+//rendering json respond
+
+function renderKeywordCategories(data) {
+  const container = document.getElementById("keyword-categories");
+
+  // 형용사 키워드 섹션 추가
+  const adjectiveSection = createCategorySection("반응", data.adjectives);
+  container.appendChild(adjectiveSection);
+
+  // 명사 키워드 섹션 추가
+  const nounSection = createCategorySection("특징", data.nouns);
+  container.appendChild(nounSection);
+}
+
+function createCategorySection(title, keywords) {
+  const section = document.createElement("div");
+  const sectionTitle = document.createElement("h4");
+  sectionTitle.innerText = title;
+
+  const keywordList = document.createElement("div");
+  keywordList.className = "keyword-list";
+
+  // 키워드 항목 생성
+  for (const [keyword, details] of Object.entries(keywords)) {
+    const keywordItem = document.createElement("div");
+    keywordItem.className = "keyword-item";
+    keywordItem.innerHTML = `<strong>${keyword}</strong> (${details.count}) ⭐ ${details.rating.toFixed(1)}`;
+    keywordItem.addEventListener("click", () => displayExamples(keyword, details));
+
+    keywordList.appendChild(keywordItem);
+  }
+
+  section.appendChild(sectionTitle);
+  section.appendChild(keywordList);
+
+  return section;
+}
+
+function displayExamples(keyword, details) {
+  const reviewList = document.getElementById("review-list");
+  reviewList.innerHTML = "";  // 이전 내용 초기화
+
+  const title = document.createElement("h4");
+  title.innerText = `${keyword} (${details.rating.toFixed(1)} ⭐)`;
+  reviewList.appendChild(title);
+
+  details.examples.forEach((example) => {
+    const exampleItem = document.createElement("p");
+    exampleItem.className = "example-item";
+    exampleItem.innerText = example;
+    reviewList.appendChild(exampleItem);
+  });
+
+  document.getElementById("selected-reviews").style.display = "block";
+}
 
 
 

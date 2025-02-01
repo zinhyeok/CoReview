@@ -17,7 +17,7 @@
         <hr class="divider" />
 
         <!-- Start Screen -->
-        <div id="start-screen", style="display: block">
+        <div id="start-screen", style="display: none">
           <div class="background-container">
             <img
               src="../imgs/gray.png"
@@ -39,12 +39,12 @@
         </div>
 
         <!-- Keywords Screen -->
-        <div id="keywords-screen" style="display: none">
+        <div id="keywords-screen" style="display: block">
           <h3>키워드 카테고리</h3>
-          <!--Keywords Categroy -->
+          <!--Keywords Categroy 렌더링 대상-->
           <div id="keyword-categories"></div>
           <!-- User input -->
-          <input type="text" id="custom-keyword" placeholder="키워드를 입력하세요">
+          <!-- <input type="text" id="custom-keyword" placeholder="키워드를 입력하세요"> -->
           <div id="selected-keywords"></div>
           <button id="organize-btn" class="action-btn">키워드 위주로 리뷰 정리</button>
           
@@ -65,6 +65,19 @@
         </div>
         <!-- keyuwords screen end -->
       </div>
+    <!-- Error Screen -->
+    <div id="error-screen" style="display: none;">
+      <div class="error-icon">
+        <img src="../imgs/error_icon.svg" alt="Error Icon" />
+      </div>
+      <h2>죄송합니다 현재 잠시 오류가 발생하였습니다</h2>
+      <p id="error-message"> 서버 통신 중 에러가 발생하였습니다</p>
+      <!-- Retry Request Button -->
+      <button id="retry-btn" class="action-btn retry">
+        다시 서버에 요청하기
+      </button>
+    </div>
+    <!-- Error Screen end -->
     <!-- default Screen end-->
     </div>
     <!-- app end -->
