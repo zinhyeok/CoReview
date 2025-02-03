@@ -5,6 +5,7 @@ chrome.runtime.onInstalled.addListener(() => {
 
 // 탭별 실행상태 저장
 let tabStates = {};
+let tabJsonData = {}; //json 결과저장(키워드 결과)
 let failedReviewData = {};  // json 통신 실패 시 저장 
 
 // 메시지 처리 리스너 크롤링과 통합
@@ -20,11 +21,17 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
   switch (request.action) {
     case "getState":
-      sendResponse({ state: tabStates[tabId] || "start-screen" });
+      sendResponse({
+        state: tabStates[tabId] || "start-screen",
+        jsonData: tabJsonData[tabId] || null
+      });
       break;
 
     case "setState":
       tabStates[tabId] = request.state;
+      if (request.jsonData) {
+        tabJsonData[tabId] = request.jsonData;
+      }
       console.log(`✅ 탭 ${tabId}의 상태가 저장되었습니다:`, request.state);
       sendResponse({ success: true });
       break;

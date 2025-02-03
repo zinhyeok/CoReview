@@ -8,7 +8,7 @@ document.addEventListener("DOMContentLoaded", () => {
       chrome.runtime.sendMessage({ action: "getState", tabId: tabId }, (response) => {
         if (response && response.state) {
           currentState = response.state;
-          changeState(currentState);
+          changeState(currentState, response.jsonData);
         } else {
           console.warn("❌ 상태를 복원할 수 없습니다. 기본 상태로 설정합니다.");
           response.state = "start-screen";
@@ -30,14 +30,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
 });
 
-function saveState(state) {
+function saveState(state, jsonData = null) {
   chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
     if (tabs.length > 0) {
       const tabId = tabs[0].id;
-      // 탭 ID와 상태를 함께 전송
-      chrome.runtime.sendMessage({ action: "setState", tabId: tabId, state: state }, (response) => {
+      // 상태와 jsonData를 함께 전송
+      chrome.runtime.sendMessage({ action: "setState", tabId: tabId, state: state, jsonData: jsonData }, (response) => {
         if (response.success) {
-          console.log("✅ 상태가 성공적으로 저장되었습니다.");
+          console.log("✅ 상태와 데이터가 성공적으로 저장되었습니다.");
         } else {
           console.error("❌ 상태 저장 실패:", response.error);
         }
@@ -46,28 +46,26 @@ function saveState(state) {
   });
 }
 
-function changeState(state) {
+function changeState(state, jsonData = null) {
   currentState = state;
-  saveState(state);
-  // 모든 화면 숨기기
+
+  // jsonData가 있는 경우 함께 저장
+  saveState(state, jsonData);
+
+  // 화면 전환
   document.getElementById("start-screen").style.display = "none";
   document.getElementById("loading-screen").style.display = "none";
   document.getElementById("keywords-screen").style.display = "none";
 
-  // 상태에 따라 적절한 화면 표시
-  document.getElementById(state).style.display = "block";
+  if (state === "keywords-screen") {
+    document.getElementById("keywords-screen").style.display = "block";
+    if (jsonData) {
+      initKeywordScreenEvents(jsonData);  // 화면에 jsonData 렌더링
+    }
+  } else {
+    document.getElementById(state).style.display = "block";
+  }
 }
-
-// function showReviewState(reviewState) {
-//   document.getElementById("loading-reviews").style.display = "none";
-//   document.getElementById("selected-reviews").style.display = "none";
-
-//   if (reviewState === "loading-reviews") {
-//     document.getElementById("loading-reviews").style.display = "block";
-//   } else if (reviewState === "selected-reviews") {
-//     document.getElementById("selected-reviews").style.display = "block";
-//   }
-// }
 
 function startCrawling(limit, includeLowRatings) {
   showLoadingScreen();
@@ -173,16 +171,14 @@ async function sendToFlask(reviews) {
 //서버로부터 response 받고 난뒤 코드
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === "displayAnalysisResults") {
-      changeState("keywords-screen")
-      //HTML 요소 업데이트 필요
       const jsonData = request.data;
+      changeState("keywords-screen", jsonData)
       initKeywordScreenEvents(jsonData);
       sendResponse({ success: true });
   }
 });
 
 function initKeywordScreenEvents(jsonData) {
-  console.log("➡️ 데이터 확인:", jsonData);
   renderKeywordCategories(jsonData);
   const organizeBtn = document.getElementById("organize-btn");
   //btn 클릭시 상세 리뷰 정리
