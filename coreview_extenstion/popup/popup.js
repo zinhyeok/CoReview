@@ -28,6 +28,15 @@ document.addEventListener("DOMContentLoaded", () => {
     changeState("loading-screen");
   });
 
+  // document.getElementById("selected-keywords").addEventListener("click", (event) => {
+  //   if (event.target.classList.contains("remove-btn")) {
+  //     const keywordElement = event.target.closest(".selected-keyword");
+  //     if (keywordElement) {
+  //       const keyword = keywordElement.getAttribute("data-keyword");
+  //       toggleKeywordSelection(keyword, document.querySelector(`.keyword-item[data-keyword="${keyword}"]`));
+  //     }
+  //   }
+  // });
 });
 
 function saveState(state, jsonData = null) {
@@ -56,7 +65,8 @@ function changeState(state, jsonData = null) {
   document.getElementById("start-screen").style.display = "none";
   document.getElementById("loading-screen").style.display = "none";
   document.getElementById("keywords-screen").style.display = "none";
-
+  document.getElementById("error-screen").style.display = "none";
+  
   if (state === "keywords-screen") {
     document.getElementById("keywords-screen").style.display = "block";
     if (jsonData) {
@@ -187,7 +197,7 @@ function initKeywordScreenEvents(jsonData) {
   });
 }
 
-//rendering json respond
+//rendering json respond for keyword
 function renderKeywordCategories(data) {
   const container = document.getElementById("keyword-categories");
   container.innerHTML = ""; // 기존 내용을 초기화
@@ -224,8 +234,9 @@ function createCategorySection(title, keywords) {
   return section;
 }
 
+//각 키워드 버튼이 클릭 가능하게 + selected시 해당 item 저장 및 제거
 function toggleKeywordSelection(keyword, keywordItem) {
-  if (selectedKeywords.has(keyword)) {
+  if (selectedKeywords.has(keyword) || document.querySelector(`.selected-keyword[data-keyword='${keyword}']`)) {
     selectedKeywords.delete(keyword);
     keywordItem.classList.remove("selected");
     removeKeyword(keyword);
@@ -234,16 +245,20 @@ function toggleKeywordSelection(keyword, keywordItem) {
     keywordItem.classList.add("selected");
     addKeyword(keyword);
   }
-
+  //활성상태 변환
   updateOrganizeButtonState();
 }
 
+//front html에 selecte keyword를 추가
 function addKeyword(keyword) {
   const keywordElement = document.createElement("div");
   const selectedContainer = document.getElementById("selected-keywords");
-
   keywordElement.className = "selected-keyword";
   keywordElement.innerHTML = `${keyword} <button class="remove-btn">X</button>`;
+
+  if (document.querySelector(`.selected-keyword[data-keyword='${keyword}']`)){
+    return;
+  }
 
   // 이벤트 리스너 등록
   keywordElement.querySelector(".remove-btn").addEventListener("click", () => {
@@ -265,24 +280,34 @@ function addKeyword(keyword) {
   selectedContainer.appendChild(keywordElement);
 }
 
-
 function removeKeyword(keyword) {
   const selectedContainer = document.getElementById("selected-keywords");
   const keywordElements = document.querySelectorAll(".keyword-item.selected");
-
   // 요소 중에서 텍스트가 해당 키워드와 일치하는 것을 찾아 제거
   keywordElements.forEach((element) => {
     if (element.textContent.trim().startsWith(keyword)) {
       element.classList.remove("selected");
     }
   });
-
   const keywordElement = selectedContainer.querySelector(`.selected-keyword`);
   if (keywordElement && keywordElement.textContent.includes(keyword)) {
     keywordElement.remove();
-  }
+    removeReview(keyword);
+  }  
 }
 
+function removeReview(keyword) {
+  const reviewsContainer = document.getElementById("review-list");
+  const reviewItems = reviewsContainer.querySelectorAll(".review-header, .review-item");
+
+  reviewItems.forEach((item) => {
+    if (new RegExp(`\\b${keyword}\\b`, 'i').test(item.textContent)) {
+      item.remove();
+    }
+  });
+}
+
+//활성상태 selectedKeywords로 판단 버튼 updates
 function updateOrganizeButtonState() {
   const organizeBtn = document.getElementById("organize-btn");
   if (selectedKeywords.size > 0) {
@@ -324,7 +349,10 @@ function highlightKeyword(text, keyword) {
   return text.replace(regex, '<span class="highlight">$1</span>');
 }
 
+
+//error page관련
 //오류 메세지 retry btn
+// 오류 메세지 관련 btn 과 json파일 저장 코드 변경필요요
 document.getElementById("retry-btn").addEventListener("click", () => {
   chrome.runtime.sendMessage({ action: "retrySendData" }, (response) => {
     if (response && response.success) {
@@ -337,7 +365,6 @@ document.getElementById("retry-btn").addEventListener("click", () => {
 
 chrome.runtime.onMessage.addListener((request) => {
   if (request.action === "showErrorPage") {
-    document.getElementById("default-screen").style.display = "none";
-    document.getElementById("error-screen").style.display = "block";
+    changeState("error-screen")
   }
 });
