@@ -28,15 +28,27 @@ document.addEventListener("DOMContentLoaded", () => {
     changeState("loading-screen");
   });
 
-  // document.getElementById("selected-keywords").addEventListener("click", (event) => {
-  //   if (event.target.classList.contains("remove-btn")) {
-  //     const keywordElement = event.target.closest(".selected-keyword");
-  //     if (keywordElement) {
-  //       const keyword = keywordElement.getAttribute("data-keyword");
-  //       toggleKeywordSelection(keyword, document.querySelector(`.keyword-item[data-keyword="${keyword}"]`));
-  //     }
-  //   }
-  // });
+  document.getElementById("selected-keywords").addEventListener("click", (event) => {
+    if (event.target.classList.contains("remove-btn")) {
+      const keywordElement = event.target.closest(".selected-keyword");
+      if (keywordElement) {
+        const keyword = keywordElement.textContent.trim().split(" ")[0];  // 키워드 추출
+        // 키워드 삭제 및 화면 업데이트
+        // const keyword = keywordElement.getAttribute("data-keyword");
+        selectedKeywords.delete(keyword);
+        removeKeyword(keyword);
+      }
+    }
+  });
+
+  document.getElementById("keyword-categories").addEventListener("click", (event) => {
+    if (event.target.classList.contains("keyword-item")) {
+      const keyword = event.target.textContent.split(" ")[0];
+      toggleKeywordSelection(keyword, event.target);
+    }
+  });
+  
+
 });
 
 function saveState(state, jsonData = null) {
@@ -225,8 +237,6 @@ function createCategorySection(title, keywords) {
     const keywordItem = document.createElement("div");
     keywordItem.className = "keyword-item";
     keywordItem.innerHTML = `${keyword} <span>(${details.count})</span>`;
-
-    keywordItem.addEventListener("click", () => toggleKeywordSelection(keyword, keywordItem));
     keywordList.appendChild(keywordItem);
   }
 
@@ -241,71 +251,69 @@ function toggleKeywordSelection(keyword, keywordItem) {
     keywordItem.classList.remove("selected");
     removeKeyword(keyword);
   } else {
-    selectedKeywords.add(keyword);
-    keywordItem.classList.add("selected");
-    addKeyword(keyword);
+    if (!document.querySelector(`.selected-keyword[data-keyword="${keyword}"]`)){
+      selectedKeywords.add(keyword);
+      keywordItem.classList.add("selected");
+      addKeyword(keyword);
+    }
   }
   //활성상태 변환
   updateOrganizeButtonState();
 }
 
-//front html에 selecte keyword를 추가
+//front html에 select keyword를 추가
 function addKeyword(keyword) {
-  const keywordElement = document.createElement("div");
-  const selectedContainer = document.getElementById("selected-keywords");
-  keywordElement.className = "selected-keyword";
-  keywordElement.innerHTML = `${keyword} <button class="remove-btn">X</button>`;
-
   if (document.querySelector(`.selected-keyword[data-keyword='${keyword}']`)){
     return;
   }
-
-  // 이벤트 리스너 등록
-  keywordElement.querySelector(".remove-btn").addEventListener("click", () => {
-    selectedKeywords.delete(keyword);
-    
-    // `.keyword-item.selected` 요소 중에서 키워드가 포함된 요소 찾기
-    const keywordItems = document.querySelectorAll(".keyword-item.selected");
-    keywordItems.forEach((item) => {
-      if (item.textContent.includes(keyword)) {
-        item.classList.remove("selected");
-      }
-    });
-
-    // 선택된 키워드 요소 제거
-    keywordElement.remove();
-    updateOrganizeButtonState();
-  });
+  const keywordElement = document.createElement("div");
+  const selectedContainer = document.getElementById("selected-keywords");
+  keywordElement.className = 'selected-keyword' ;
+  keywordElement.id = `selected-${keyword}`;
+  keywordElement.innerHTML = `${keyword} <button class="remove-btn">X</button>`;
 
   selectedContainer.appendChild(keywordElement);
+  updateOrganizeButtonState();
 }
 
 function removeKeyword(keyword) {
-  const selectedContainer = document.getElementById("selected-keywords");
-  const keywordElements = document.querySelectorAll(".keyword-item.selected");
-  // 요소 중에서 텍스트가 해당 키워드와 일치하는 것을 찾아 제거
-  keywordElements.forEach((element) => {
-    if (element.textContent.trim().startsWith(keyword)) {
-      element.classList.remove("selected");
+  // `.keyword-item.selected` selected 상태 제거
+  document.querySelectorAll(".keyword-item.selected").forEach((item) => {
+    if (item.textContent.trim().startsWith(keyword)) {
+      item.classList.remove("selected");
     }
   });
-  const keywordElement = selectedContainer.querySelector(`.selected-keyword`);
-  if (keywordElement && keywordElement.textContent.includes(keyword)) {
+
+  // `.selected-keyword` UI 제거
+  // const selectedContainer = document.getElementById("selected-keywords");
+  const keywordElement = document.getElementById(`selected-${keyword}`);
+  if (keywordElement) {
     keywordElement.remove();
-    removeReview(keyword);
-  }  
+  }
+
+  // 상태 업데이트 및 리뷰 상세 결과 제거
+  updateOrganizeButtonState();
+  removeReview(keyword);
 }
+
 
 function removeReview(keyword) {
   const reviewsContainer = document.getElementById("review-list");
+  if (!reviewsContainer) {
+    console.warn("리뷰 컨테이너가 존재하지 않습니다.");
+    return;
+  }
+  
   const reviewItems = reviewsContainer.querySelectorAll(".review-header, .review-item");
-
+  
   reviewItems.forEach((item) => {
-    if (new RegExp(`\\b${keyword}\\b`, 'i').test(item.textContent)) {
+    if (item && item.textContent.toLowerCase().includes(keyword.toLowerCase())) {
+      console.log(`🗑️ '${keyword}'가 포함된 리뷰 항목 제거:`, item);
       item.remove();
     }
   });
 }
+
 
 //활성상태 selectedKeywords로 판단 버튼 updates
 function updateOrganizeButtonState() {
