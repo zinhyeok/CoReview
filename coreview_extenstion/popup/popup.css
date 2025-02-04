@@ -79,13 +79,17 @@ h2 {
 /* laadoing screen*/
 #loading-screen {
   display: flex;
-  justify-content: center; 
-  align-items: center; 
+  justify-content: center;
+  align-items: center;
+  position: fixed;
+  top: 55%;
+  left: 50%;
+  transform: translate(-50%, -50%);
 }
 
 #loadingImg {
-  width: 213px; 
-  height: 208px;
+  width: 113px;
+  height: 108px;
 }
 
 .loading-animation {
@@ -126,22 +130,21 @@ h2 {
 }
 
 h3 {
-  font-size: 18px;
-  color: #333;
-  text-align: center;
+  font-size: 16px;
+  margin: 15px;
+  color: #4167d9;
+  text-align: left;
 }
 
 #keyword-categories {
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
   padding: 10px;
-  margin-top: 20px;
 }
 
 .category-section {
   display: flex;
-  flex-direction: column;
-  align-items: center;
+  width: 100%;
   flex: 1;
 }
 
@@ -150,6 +153,9 @@ h3 {
   font-weight: bold;
   color: #333;
   margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .vertical-divider {
@@ -161,49 +167,50 @@ h3 {
 .keyword-list {
   display: flex;
   overflow-x: auto;
-  gap: 10px;
+  gap: 6px;
   padding: 10px;
-  max-width: 100%;
+  visibility: visible;
 }
 
 .keyword-item {
   padding: 10px 15px;
-  background-color: #eef2f7;
+  background-color: #eaeaea;
   border-radius: 8px;
   font-size: 14px;
   font-weight: bold;
   color: #333;
   cursor: pointer;
   white-space: nowrap;
+  display: inline-block; /* 키워드 요소들이 보이도록 설정 */
 }
 
 .keyword-item span {
-  color: #0056f9;
+  color: #4167d9;
   font-weight: bold;
   margin-left: 5px;
 }
 
 .keyword-item:hover {
-  background-color: #d9e3f0;
+  background-color: #c8d3f4;
 }
 
 .keyword-item.selected {
-  background: #0056f9;
-  color: white;
+  background: #e3e9f9;
+  color: #333;
 }
 
 #selected-keywords {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 8px;
   padding: 10px;
 }
 
 .selected-keyword {
   padding: 8px 12px;
-  background-color: #0056f9;
-  color: white;
-  border-radius: 5px;
+  background-color: #e3e9f9;
+  color: #333;
+  border-radius: 20px;
   display: flex;
   align-items: center;
   gap: 5px;
@@ -212,7 +219,7 @@ h3 {
 .remove-btn {
   background: none;
   border: none;
-  color: white;
+  color: #707070;
   font-weight: bold;
   cursor: pointer;
 }
@@ -225,23 +232,58 @@ h3 {
   border-radius: 5px;
 }
 
+#organize-btn {
+  width: 100%;
+  padding: 10px;
+  background-color: #eaeaea;
+  color: #999999;
+  font-size: 12px;
+  font-weight: bold;
+  border: none;
+  border-radius: 20px;
+  cursor: not-allowed;
+}
+
+#organize-btn.active {
+  background-color: #0056f9;
+  cursor: pointer;
+  color: white;
+}
+
 #error-screen {
-  text-align: center;
   background: white;
   padding: 40px;
-  border-radius: 12px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   width: 400px;
-  max-width: 90%;
+  max-width: 100%;
+
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
 }
 
 .error-icon img {
-  width: 80px;
+  width: 60px;
   margin-bottom: 20px;
 }
 
+#error-smallmessage,
+#error-message {
+  font-size: 14px;
+  font-weight: 400;
+  color: #333;
+  margin-bottom: 10px;
+}
 .action-btn.retry {
   background: #4167d9;
+  margin-top: 20px;
+  width: fit-content;
+  text-align: center; /* 버튼 내부 텍스트 중앙 정렬 */
+  display: block; /* flex 대신 block으로 설정하여 부모 요소가 중앙 정렬을 조절하도록 함 */
 }
 
 @media (max-width: 768px) {
@@ -251,12 +293,12 @@ h3 {
   }
 
   h2 {
-    font-size: 9px;
-    margin-left: 5%;
+    font-size: 12px;
+    margin-left: 50%;
   }
 
   .action-btn {
-    width: 90%;
+    width: 50%;
     left: 5%;
     padding: 12px 20px;
     font-size: 14px;
