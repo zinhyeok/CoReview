@@ -19,15 +19,14 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
   document.getElementById("fast-btn").addEventListener("click", () => {
-    startCrawling(90, true);
+    startCrawling(90, true, "fast"); 
     changeState("loading-screen");
   });
 
   document.getElementById("slow-btn").addEventListener("click", () => {
-    startCrawling(Infinity, false);
+    startCrawling(10000, false, "slow"); 
     changeState("loading-screen");
   });
-
 });
 
 function saveState(state, jsonData = null) {

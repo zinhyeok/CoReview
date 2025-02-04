@@ -1,24 +1,43 @@
 (() => {
     chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         if (request.action === "startCrawling") {
-            startCrawling();
+            startCrawling(request.limit, request.includeLowRatings);
         }
     });
 
-    async function startCrawling() {
-        console.log("🚀 리뷰 크롤링을 시작합니다...");
+    async function startCrawling(limit = 10000, includeLowRatings = false, mode = "slow") {
+        console.log(`🚀 ${mode === "fast" ? "빠른 모드" : "전체 크롤링"}을 시작합니다...`);
         
         let allReviews = [];
+        let lowRatingReviews = { '1': [], '2': [] };
         let currentPage = 1;
         let visitedPages = new Set();
 
         while (true) {
             console.log(`📄 페이지 ${currentPage} 리뷰 크롤링 중...`);
-
-            // 현재 페이지 리뷰 가져오기
+            
             const reviews = extractReviews();
-            allReviews = allReviews.concat(reviews);
+            reviews.forEach(review => {
+                if (mode === "fast") {
+                    if (review.rating === "1" && lowRatingReviews['1'].length < 10) {
+                        lowRatingReviews['1'].push(review);
+                    } else if (review.rating === "2" && lowRatingReviews['2'].length < 10) {
+                        lowRatingReviews['2'].push(review);
+                    } else if (allReviews.length < limit) {
+                        allReviews.push(review);
+                    }
+                } else {
+                    allReviews.push(review);
+                }
+            });
+            
             visitedPages.add(currentPage);
+            if (mode === "fast" && allReviews.length >= limit && lowRatingReviews['1'].length >= 20 && lowRatingReviews['2'].length >= 20) {
+                break;
+            }
+            if (mode === "slow" && allReviews.length >= limit) {
+                break;
+            }
 
             // 마지막 페이지인지 확인
             let nextPageButton = findNextPageButton(currentPage, visitedPages);
@@ -44,9 +63,9 @@
             currentPage++;
         }
 
-        console.log(`✅ 총 ${allReviews.length}개의 리뷰를 수집했습니다.`);
-        // saveJSON(allReviews);
-        sendToFlask(allReviews)
+        let finalReviews = mode === "fast" ? [...allReviews, ...lowRatingReviews['1'], ...lowRatingReviews['2']] : allReviews;
+        console.log(`✅ 총 ${finalReviews.length}개의 리뷰를 수집했습니다.`);
+        sendToFlask(finalReviews);
     }
 
     function extractReviews() {
