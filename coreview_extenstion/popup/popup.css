@@ -252,39 +252,47 @@ h3 {
 }
 
 #error-screen {
-  background: white;
-  padding: 40px;
-  width: 400px;
-  max-width: 100%;
-
+  display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  justify-content: space-between;
+  background: white;
+  max-width: 100%;
   text-align: center;
+  padding: 20px;
+  box-sizing: border-box;
 }
 
 .error-icon img {
   width: 60px;
-  margin-bottom: 20px;
+  margin: 20px 0;
 }
 
 #error-smallmessage,
 #error-message {
+  width: 100%;
   font-size: 14px;
   font-weight: 400;
   color: #333;
   margin-bottom: 10px;
+  text-align: center;
 }
-.action-btn.retry {
+
+.retry-btn-container {
+  width: 100%;
+  display: grid;
+  justify-content: center;
+  margin-top: auto;
+  padding-bottom: 20px;
+}
+
+#retry-btn {
+  position: static;
   background: #4167d9;
-  margin-top: 20px;
+  padding: 12px 20px;
   width: fit-content;
   text-align: center; /* 버튼 내부 텍스트 중앙 정렬 */
-  display: block; /* flex 대신 block으로 설정하여 부모 요소가 중앙 정렬을 조절하도록 함 */
+  cursor: pointer;
 }
 
 @media (max-width: 768px) {
@@ -310,10 +318,6 @@ h3 {
   }
 
   .action-btn.slow {
-    top: 48%;
-  }
-
-  .action-btn.retry {
     top: 48%;
   }
 
@@ -348,11 +352,6 @@ h3 {
   .action-btn.slow {
     top: 50%;
   }
-
-  .action-btn.retry {
-    top: 50%;
-  }
-
   .keyword-item {
     font-size: 12px;
     padding: 8px 12px;

@@ -60,7 +60,7 @@
 
         let finalReviews = [...allReviews, ...lowRatingReviews['1'], ...lowRatingReviews['2']];
         console.log(`✅ 총 ${finalReviews.length}개의 리뷰를 수집했습니다.`);
-        saveJSON(finalReviews);
+        // saveJSON(finalReviews);
         sendToFlask(finalReviews);
     }
 

@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Coreview</title>
+    <link rel="stylesheet" href="popup.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+   </head>
+   <body>
+    <div id="app">
+      <!-- default Screen -->
+      <div id="default-screen">
+        <h2>리뷰의 본질을 한눈에,</h2>
+        <img src="../imgs/coreview_logo.png" alt="Coreview Logo" class="logo">
+        <hr class="divider">
+
+        <!-- Start Screen -->
+        <div id="start-screen" ,="" style="display: none;">
+          <div class="background-container">
+            <img src="../imgs/gray.png" alt="Background" class="background-image">
+            <button id="fast-btn" class="action-btn fast">
+              빠르게 리뷰 분석하기 <span>fast</span>
+            </button>
+            <button id="slow-btn" class="action-btn slow">
+              꼼꼼하게 리뷰 분석하기 <span>slow</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Loading Screen -->
+        <div id="loading-screen" style="display: none; opacity: 1;">
+          <img id="loadingImg" src="../imgs/loading.gif" alt="Loading" class="loading-icon">
+        </div>
+
+        <!-- Keywords Screen -->
+        <div id="keywords-screen" style="display: block;">
+          <h3>키워드 카테고리</h3>
+          <!--Keywords Categroy 렌더링 대상-->
+          <div id="keyword-categories"><div class="category-section"><h4>반응</h4><div class="keyword-list"><div class="keyword-item selected">솔직히 <span>(1)</span></div><div class="keyword-item">아쉬 <span>(3)</span></div><div class="keyword-item">예쁘 <span>(4)</span></div><div class="keyword-item">작아 <span>(3)</span></div></div></div><div class="category-section"><h4>특징</h4><div class="keyword-list"><div class="keyword-item">마음 <span>(4)</span></div><div class="keyword-item selected">배송 <span>(9)</span></div><div class="keyword-item">뿌리 <span>(13)</span></div><div class="keyword-item">상태 <span>(11)</span></div><div class="keyword-item">식물 <span>(30)</span></div><div class="keyword-item">싱싱 <span>(14)</span></div><div class="keyword-item">유리 <span>(11)</span></div><div class="keyword-item">재배 <span>(9)</span></div><div class="keyword-item">포장 <span>(11)</span></div><div class="keyword-item">화분 <span>(7)</span></div></div></div></div>
+          <!-- User input -->
+          <!-- <input type="text" id="custom-keyword" placeholder="키워드를 입력하세요"> -->
+          <div id="selected-keywords"><div class="selected-keyword" id="selected-솔직히">솔직히 <button class="remove-btn">X</button></div><div class="selected-keyword" id="selected-배송">배송 <button class="remove-btn">X</button></div></div>
+
+          <button id="organize-btn" class="action-btn disabled active">
+            키워드 위주로 리뷰 정리
+          </button>
+          <!-- Review Result Screen -->
+          <div id="reviews-screen">
+            <!-- Loading for keyword -->
+            <div id="selected-reviews">
+              <div id="review-list"><div class="review-header"><strong>솔직히</strong> <span class="rating">(5.0)</span></div><div class="review-item"><span class="highlight">솔직히</span>  별 기대 안했어요그냥 포기상태였거든요그런데 다시 보내주시겠다며 친절하게 말씀해주시더라고요 식물을 산 이유는 비염으로 시달리는 어린아이들을 위해 수경재배하려고 주문한 이쁜 아가들이였고 큰기대가 큰만큼 속도 많이 속상했었어요 이미 얼은부분은 잘랐고 직장도 나가야 하는 상황이라 다시 보내드리기 힘들다고 하니  재출고 해주시겠다며 속상한 마음을 달래주셨던것 같아요 하루만에 상태가 좋은 아가들이 왔네요 사장님~ 감사합니다 저는 <span class="highlight">솔직히</span> 업체 잘못이라 보기에는 어려워서 민원을 안넣은건데 ....</div><div class="review-header"><strong>배송</strong> <span class="rating">(4.4)</span></div><div class="review-item">모두 좋은 상태로 <span class="highlight">배송</span>이 되었는데한종류만 유독 살아나지 못하고 썩어버리네요.</div><div class="review-item"><span class="highlight">배송</span> 롯데택배 <span class="highlight">배송</span>으로 문제없이 도착2.</div><div class="review-item">모종상태좋아요!플라스틱 모종 화분에 <span class="highlight">배송</span>이됩니다.스노우 사파이어는 뿌리도 깔끔하고 깨끗해서<span class="highlight">배송</span>되어온 유리병+ 흰자갈 이용해서수경재배 하기로 결정!!(원래가 수경재배 키트인데..;;^^)스마트 필름은 생각보다 모종이 큰거 같아서,토분에 옮겨 심었습니다!계속 꽃이 자라는 수종이어서, 키우는 재미가 있죠!옮겨심으니까 예쁘네요~~~!!❤️여기 모종, 뿌리도 싱싱하고 괜찮네요!스노우 사파이어 일주일만에 금방 새잎이 돋았어요~!수경재배 키트도 깔끔하고요~!<span class="highlight">배송</span>당시 상태도 좋았습니다.최대한 식물이 다치지 않게 포장 잘해주셨더라구요!잘 키워볼게요❤️</div></div>
+            </div>
+          </div>
+        </div>
+        <!-- keyuwords screen end -->
+      </div>
+      <!-- Error Screen -->
+      <div id="error-screen" style="display: none">
+        <div class="error-icon">
+          <img src="../imgs/error_icon.svg" alt="Error Icon">
+        </div>
+        <h2 id="error-smallmessage">
+          죄송합니다 현재 잠시 오류가 발생하였습니다
+        </h2>
+        <p id="error-message">서버 통신 중 에러가 발생하였습니다</p>
+        <!-- Retry Request Button -->
+        <button id="retry-btn" class="action-btn retry">
+          다시 서버에 요청하기
+        </button>
+      </div>
+      <!-- Error Screen end -->
+      <!-- default Screen end-->
+    </div>
+    <!-- app end -->
+    <script src="popup.js"></script>
+  
+
+</body>
+</html>
