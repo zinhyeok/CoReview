@@ -17,7 +17,7 @@
         <hr class="divider" />
 
         <!-- Start Screen -->
-        <div id="start-screen", style="display: block">
+        <div id="start-screen" , style="display: block">
           <div class="background-container">
             <img
               src="../imgs/gray.png"
@@ -32,10 +32,15 @@
             </button>
           </div>
         </div>
-      
+
         <!-- Loading Screen -->
         <div id="loading-screen" style="display: none">
-          <img id="loadingImg" src="../imgs/loading.gif" alt="Loading" class="loading-icon" />
+          <img
+            id="loadingImg"
+            src="../imgs/loading.gif"
+            alt="Loading"
+            class="loading-icon"
+          />
         </div>
 
         <!-- Keywords Screen -->
@@ -46,34 +51,36 @@
           <!-- User input -->
           <!-- <input type="text" id="custom-keyword" placeholder="키워드를 입력하세요"> -->
           <div id="selected-keywords"></div>
-          <button id="organize-btn" class="action-btn disabled">키워드 위주로 리뷰 정리</button>
-          
+
+          <button id="organize-btn" class="action-btn disabled">
+            키워드 위주로 리뷰 정리
+          </button>
           <!-- Review Result Screen -->
-          <div id="reviews-screen"> 
+          <div id="reviews-screen">
             <!-- Loading for keyword -->
             <div id="selected-reviews">
               <div id="review-list"></div>
             </div>
-
           </div>
-        
         </div>
         <!-- keyuwords screen end -->
       </div>
-    <!-- Error Screen -->
-    <div id="error-screen" style="display: none;">
-      <div class="error-icon">
-        <img src="../imgs/error_icon.svg" alt="Error Icon" />
+      <!-- Error Screen -->
+      <div id="error-screen" style="display: none">
+        <div class="error-icon">
+          <img src="../imgs/error_icon.svg" alt="Error Icon" />
+        </div>
+        <h2 id="error-smallmessage">
+          죄송합니다 현재 잠시 오류가 발생하였습니다
+        </h2>
+        <p id="error-message">서버 통신 중 에러가 발생하였습니다</p>
+        <!-- Retry Request Button -->
+        <button id="retry-btn" class="action-btn retry">
+          다시 서버에 요청하기
+        </button>
       </div>
-      <h2>죄송합니다 현재 잠시 오류가 발생하였습니다</h2>
-      <p id="error-message"> 서버 통신 중 에러가 발생하였습니다</p>
-      <!-- Retry Request Button -->
-      <button id="retry-btn" class="action-btn retry">
-        다시 서버에 요청하기
-      </button>
-    </div>
-    <!-- Error Screen end -->
-    <!-- default Screen end-->
+      <!-- Error Screen end -->
+      <!-- default Screen end-->
     </div>
     <!-- app end -->
     <script src="popup.js"></script>
