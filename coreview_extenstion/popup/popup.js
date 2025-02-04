@@ -18,15 +18,18 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
 
-  document.getElementById("fast-btn").addEventListener("click", () => {
-    startCrawling(90, true, "fast"); 
-    changeState("loading-screen");
+    document.getElementById("fast-btn").addEventListener("click", () => {
+      console.log("🚀 fast-btn 클릭됨! startCrawling 실행: mode=fast");
+      startCrawling(90, true, "fast"); 
+      changeState("loading-screen");
   });
-
+  
   document.getElementById("slow-btn").addEventListener("click", () => {
-    startCrawling(10000, false, "slow"); 
-    changeState("loading-screen");
+      console.log("🐢 slow-btn 클릭됨! startCrawling 실행: mode=slow");
+      startCrawling(10000, false, "slow"); 
+      changeState("loading-screen");
   });
+  
 });
 
 function saveState(state, jsonData = null) {
@@ -66,10 +69,10 @@ function changeState(state, jsonData = null) {
   }
 }
 
-function startCrawling(limit, includeLowRatings) {
+function startCrawling(limit, includeLowRatings, mode) {
   showLoadingScreen();
 
-  sendMessageToContentScript(limit, includeLowRatings)
+  sendMessageToContentScript(limit, includeLowRatings ,mode)
     .then(() => {
       console.log('크롤링 완료')
     })
@@ -79,7 +82,7 @@ function startCrawling(limit, includeLowRatings) {
 }
 
 
-function sendMessageToContentScript(limit, includeLowRatings) {
+function sendMessageToContentScript(limit, includeLowRatings, mode) {
   return new Promise((resolve, reject) => {
     try {
       chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
@@ -88,7 +91,8 @@ function sendMessageToContentScript(limit, includeLowRatings) {
           return;
         }
 
-        // content.js를 실행하는 코드
+        console.log("📨 content.js로 메시지 전달:", { limit, includeLowRatings, mode });
+
         chrome.scripting.executeScript(
           {
             target: { tabId: tabs[0].id },
@@ -99,6 +103,7 @@ function sendMessageToContentScript(limit, includeLowRatings) {
               action: "startCrawling",
               limit: limit,
               includeLowRatings: includeLowRatings,
+              mode: mode, // ✅ mode 전달 확인
             });
             resolve();
           }
@@ -109,6 +114,7 @@ function sendMessageToContentScript(limit, includeLowRatings) {
     }
   });
 }
+
 
 
 function showLoadingScreen() {
