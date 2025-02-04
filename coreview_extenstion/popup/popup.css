@@ -204,7 +204,7 @@ h3 {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  padding: 10px;
+  padding: 8px 20px 15px 20px;
 }
 
 .selected-keyword {
@@ -228,7 +228,7 @@ h3 {
 #review-list .review-item {
   background: #f9f9f9;
   border: 1px solid #ddd;
-  margin-bottom: 10px;
+  margin: 0px 12px 12px;
   padding: 10px;
   border-radius: 5px;
 }
@@ -249,6 +249,34 @@ h3 {
   background-color: #4167d9;
   cursor: pointer;
   color: white;
+}
+
+#reviews-screen {
+  display: block;
+  margin-top: 40px;
+}
+
+.review-header {
+  padding: 10px;
+  font-size: 14px;
+}
+
+#review-list .review-item {
+  background: #f9f9f9;
+  border: 1px solid #ddd;
+  margin-bottom: 10px;
+  padding: 15px;
+  border-radius: 5px;
+}
+
+.rating {
+  color: #4167d9;
+  font-weight: bold;
+}
+
+.highlight {
+  color: #4167d9;
+  font-weight: bold;
 }
 
 #error-screen {
@@ -336,8 +364,7 @@ h3 {
   }
 
   .action-btn {
-    width: 80%;
-    left: 10%;
+    width: 90%;
     padding: 10px 18px;
   }
 
