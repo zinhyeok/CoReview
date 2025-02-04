@@ -335,10 +335,11 @@ function renderReviews(data) {
   const reviewsContainer = document.getElementById("review-list");
   keywords = Array.from(selectedKeywords);
   reviewsContainer.innerHTML = ""; // 기존 리뷰 초기화
+  
   keywords.forEach((keyword) => {
-    if (data.adjectives[keyword]) {
-      const { rating, examples } = data.adjectives[keyword];
-
+    let reviewData = data.adjectives[keyword] || data.nouns[keyword];  
+    if (reviewData) {
+      const { rating, examples } = reviewData;
       // 키워드 제목 및 리뷰 섹션 추가
       const reviewHeader = document.createElement("div");
       reviewHeader.className = "review-header";

@@ -13,6 +13,7 @@
 
         let allReviews = [];
         let lowRatingReviews = { '1': [], '2': [] };
+        let visitedPages = new Set();
 
         if (mode === "fast") {
             console.log("🔹 상위 50개 리뷰 수집 시작...");
@@ -30,17 +31,29 @@
             console.log("🔹 전체 리뷰 크롤링 시작...");
             let currentPage = 1;
             while (allReviews.length < limit) {
+                console.log(`📄 페이지 ${currentPage} 리뷰 크롤링 중...`);
                 const reviews = extractReviews();
                 allReviews.push(...reviews);
+                visitedPages.add(currentPage);
 
                 if (allReviews.length >= limit) break;
 
                 let nextPageButton = findNextPageButton(currentPage);
-                if (!nextPageButton) break;
-
+                
+                if (!nextPageButton) {
+                    console.log("🚀 더 이상 페이지 없음 → 크롤링 종료!");
+                    break;
+                }
+                // 현재 페이지 내용 저장 (DOM 변경 감지용)
                 let previousPageContent = document.body.innerHTML;
                 nextPageButton.click();
-                await waitForPageChange(previousPageContent, 10);
+                console.log(`➡️ 페이지 ${currentPage + 1} 이동 중...`);
+
+                let pageChanged = await waitForPageChange(previousPageContent, 10);
+                if (!pageChanged) {
+                    console.log("⚠️ 페이지 로딩 실패! → 크롤링 종료");
+                    break;
+                }
                 currentPage++;
             }
         }
@@ -129,13 +142,18 @@
 
     function findNextPageButton(currentPage) {
         let nextPageButton = document.querySelector(`button.sdp-review__article__page__num.js_reviewArticlePageBtn[data-page="${currentPage + 1}"]`);
+        // 다음 페이지 버튼이 없으면 "다음" 버튼 찾기
         if (!nextPageButton) {
-            nextPageButton = document.querySelector(".sdp-review__article__page__next:not(.disabled)");
+            const nextArrowButton = document.querySelector(".sdp-review__article__page__next");
+            if (nextArrowButton && !nextArrowButton.classList.contains("disabled")) {
+                return nextArrowButton;
+            }
         }
         return nextPageButton;
     }
 
     async function waitForPageChange(previousPageContent, maxRetries) {
+        console.log("⌛ 페이지 변경 감지 중...");
         let attempts = maxRetries;
         while (attempts > 0) {
             await new Promise(resolve => setTimeout(resolve, 1500));
@@ -152,7 +170,10 @@
         const a = document.createElement("a");
         a.href = url;
         a.download = "coupang_reviews.json";
+        document.body.appendChild(a);
         a.click();
+        document.body.removeChild(a);
+        console.log("📁 JSON 파일 다운로드 완료!");
     }
 
     async function sendToFlask(reviews) {
