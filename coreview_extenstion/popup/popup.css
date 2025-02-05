@@ -30,7 +30,7 @@ h2 {
 
 .background-container {
   position: relative;
-  width: 100%;
+  width: 90%;
   max-width: 400px;
   margin: 0 auto;
 }
@@ -166,10 +166,11 @@ h3 {
 }
 
 .keyword-type {
-  width: 55px;
+  width: 45px;
   height: 20px;
   text-align: center;
-  writing-mode: horizontal-tb; 
+  writing-mode: horizontal-tb;
+  position: absolute;
 }
 
 .keyword-list {
@@ -232,6 +233,10 @@ h3 {
   color: #707070;
   font-weight: bold;
   cursor: pointer;
+}
+
+#review-list {
+  padding: 5px 5px 25px 5px;
 }
 
 #review-list .review-item {
@@ -354,16 +359,19 @@ h3 {
   }
 
   .action-btn.fast {
-    top: 22%;
+    top: 25%;
+    padding: 12px 15px 12px 15px;
   }
 
   .action-btn.slow {
-    top: 48%;
+    top: 50%;
+    padding: 12px 15px 12px 15px;
   }
 
   .keyword-list {
     gap: 5px;
     padding: 5px;
+    margin-left: 45px;
     max-width: 100%;
   }
 }
