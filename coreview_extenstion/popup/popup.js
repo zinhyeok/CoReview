@@ -240,12 +240,16 @@ function createCategorySection(title, keywords) {
   keywordList.className = "keyword-list";
 
   for (const [keyword, details] of Object.entries(keywords)) {
-    const keywordItem = document.createElement("div");
-    keywordItem.className = "keyword-item";
-    keywordItem.innerHTML = `${keyword} <span>(${details.count})</span>`;
-    keywordList.appendChild(keywordItem);
-  }
-
+    if (details.count !== 0) {
+        // 키워드 길이 조건 처리
+        const displayKeyword = keyword.length > 4 ? keyword.substring(0, 4) : keyword;
+        // 요소 생성 및 추가
+        const keywordItem = document.createElement("div");
+        keywordItem.className = "keyword-item";
+        keywordItem.innerHTML = `${displayKeyword} <span>${details.count}</span>`;
+        keywordList.appendChild(keywordItem);
+    }
+}
   section.appendChild(keywordList);
   return section;
 }
