@@ -5,8 +5,7 @@ chrome.runtime.onInstalled.addListener(() => {
 
 // 탭별 실행상태 저장
 let tabStates = {};
-let tabJsonData = {}; //json 결과저장(키워드 결과)
-let failedReviewData = {};  // json 통신 실패 시 저장 
+let tabJsonData = {}; //json 결과저장(키워드 결과 및 통신실패시도 저장
 
 // 메시지 처리 리스너 크롤링과 통합
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
@@ -40,6 +39,15 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       console.log("🔄 크롤링 시작...");
       sendResponse({ success: true, message: "크롤링을 시작합니다." });
       break;
+    
+    case "crawlComplete":
+      console.log("📨 크롤링 결과 popup.js로 전송");
+      chrome.runtime.sendMessage({
+        action: "crawlResults",
+        data: request.data,
+      });
+      sendResponse({ success: true, message: "크롤링 결과 전달 완료" });
+      break;
 
     case "showAnalysis":
       console.log("📨 분석 결과 popup.js로 전송...");
@@ -47,18 +55,19 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         action: "displayAnalysisResults",
         data: request.data,
       });
-      sendResponse({ success: true, message: "결과 전달 완료" });
+      sendResponse({ success: true, message: "분석 결과 전달 완료" });
       break;
 
-      case "saveFailedData":
-        failedReviewData[tabId] = request.data;
+    case "saveFailedData":
+        tabJsonData[tabId] = request.data;
         console.log("❌ 전송 실패 데이터 저장:", request.data);
         sendResponse({ success: true });
         break;
   
     case "retrySendData":
-      if (failedReviewData[tabId]) {
-        chrome.runtime.sendMessage({ action: "retrySendData", data: failedReviewData[tabId] });
+      if (tabJsonData[tabId]) {
+        chrome.runtime.sendMessage({ action: "retrySendData", data: tabJsonData[tabId] });
+        sendResponse({ success: true, message: "크롤링결과 전달 완료" });
       } else {
         sendResponse({ success: false, message: "재전송할 데이터가 없습니다." });
       }
