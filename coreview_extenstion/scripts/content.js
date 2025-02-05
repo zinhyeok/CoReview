@@ -20,13 +20,13 @@
             await collectTopReviews(50, allReviews);
             console.log(`✅ 상위 50개 리뷰 수집 완료! (현재 ${allReviews.length}개)`);
 
-            console.log("🔹 1점 리뷰 수집 시작...");
-            await collectLowRatingReviews(1, lowRatingReviews['1'], 20);
-            console.log(`✅ 1점 리뷰 수집 완료! (총 ${lowRatingReviews['1'].length}개)`);
+            // console.log("🔹 1점 리뷰 수집 시작...");
+            // await collectLowRatingReviews(1, lowRatingReviews['1'], 20);
+            // console.log(`✅ 1점 리뷰 수집 완료! (총 ${lowRatingReviews['1'].length}개)`);
 
-            console.log("🔹 2점 리뷰 수집 시작...");
-            await collectLowRatingReviews(2, lowRatingReviews['2'], 20);
-            console.log(`✅ 2점 리뷰 수집 완료! (총 ${lowRatingReviews['2'].length}개)`);
+            // console.log("🔹 2점 리뷰 수집 시작...");
+            // await collectLowRatingReviews(2, lowRatingReviews['2'], 20);
+            // console.log(`✅ 2점 리뷰 수집 완료! (총 ${lowRatingReviews['2'].length}개)`);
         } else {
             console.log("🔹 전체 리뷰 크롤링 시작...");
             let currentPage = 1;
@@ -84,26 +84,46 @@
     async function collectLowRatingReviews(targetRating, storage, maxCount) {
         let currentPage = 1;
     
+        console.log(`📄 ${targetRating}점 리뷰 페이지 ${currentPage} 크롤링 중...`);
+    
+        // 1. 리뷰 섹션으로 스크롤
+        const reviewSection = document.querySelector(".sdp-review__article__list");
+        if (reviewSection) {
+            reviewSection.scrollIntoView({ behavior: "smooth" });
+            console.log("🔄 리뷰 섹션으로 스크롤 완료");
+            await new Promise(resolve => setTimeout(resolve, 500));  // 스크롤 후 대기
+        }
+    
+        // 2. 별점 필터 선택
+        const allStarsButton = document.querySelector(".sdp-review__article__order__star__all__current--active");
+        if (allStarsButton) {
+            allStarsButton.click();
+            console.log("🔄 별점 선택 리스트를 펼쳤습니다.");
+            await new Promise(resolve => setTimeout(resolve, 500));  // 대기
+        }
+    
+        // 3. 별점 필터 버튼 찾기
+        const filterButton = document.querySelector(`.sdp-review__article__order__star__list__item[data-rating="${targetRating}"]`);
+        if (!filterButton) {
+            console.error(`❌ ${targetRating}점 필터 버튼을 찾을 수 없음`);
+            return;
+        }
+    
+        console.log(`✅ ${targetRating}점 필터 버튼 찾음:`, filterButton);
+    
+        // 4. 강제 클릭 수행
+        filterButton.scrollIntoView({ behavior: "smooth", block: "center" });
+        await new Promise(resolve => setTimeout(resolve, 500));  // 대기
+        forceClick(filterButton);
+        console.log(`✅ ${targetRating}점 필터 버튼 클릭 완료`);
+    
+        // 5. 페이지 변경 대기
+        await waitForPageChange(document.body.innerHTML, 10);
+    
+        // 6. 리뷰 수집 루프
         while (storage.length < maxCount) {
-            console.log(`📄 ${targetRating}점 리뷰 페이지 ${currentPage} 크롤링 중...`);
-    
-            // ⭐ 1점/2점 필터 버튼 찾기
-            let filterButtons = document.querySelectorAll(".js_reviewArticleStarSelectOption");
-            let filterButton = Array.from(filterButtons).find(el => el.getAttribute("data-rating") === targetRating.toString());
-    
-            if (filterButton) {
-                console.log(`✅ ${targetRating}점 필터 버튼 클릭`);
-                filterButton.click();
-                await waitForPageChange(document.body.innerHTML, 10);
-            } else {
-                console.error(`❌ ${targetRating}점 필터 버튼을 찾을 수 없음`);
-                break;
-            }
-    
-            // ⭐ 리뷰 수집
             const reviews = extractReviews();
             console.log(`📝 ${targetRating}점 리뷰 ${reviews.length}개 수집`);
-    
             reviews.forEach(review => {
                 if (parseInt(review.rating) === targetRating && storage.length < maxCount) {
                     storage.push(review);
@@ -112,8 +132,8 @@
     
             console.log(`🔹 현재 ${targetRating}점 리뷰 수집 개수: ${storage.length}/${maxCount}`);
     
-            // ✅ 다음 페이지 이동 (상위 50개 크롤링할 때 쓰는 코드와 동일하게 적용)
-            let nextPageButton = findNextPageButton(currentPage);
+            // 7. 다음 페이지 이동
+            const nextPageButton = findNextPageButton(currentPage);
             if (!nextPageButton || storage.length >= maxCount) {
                 console.log(`✅ ${targetRating}점 리뷰 ${storage.length}개 수집 완료!`);
                 break;
@@ -125,8 +145,22 @@
             await waitForPageChange(previousPageContent, 10);
             currentPage++;
         }
-    }    
+    }
+    
 
+    function forceClick(element) {
+        const rect = element.getBoundingClientRect();
+        const clickEvent = new MouseEvent('click', {
+            view: window,
+            bubbles: true,
+            cancelable: true,
+            clientX: rect.left + rect.width / 2,
+            clientY: rect.top + rect.height / 2
+        });
+        element.dispatchEvent(clickEvent);
+        console.log("✅ 강제 클릭 이벤트 발생:", element);
+    }
+    
     function extractReviews() {
         const reviews = [];
         document.querySelectorAll("article.sdp-review__article__list").forEach(reviewElement => {
