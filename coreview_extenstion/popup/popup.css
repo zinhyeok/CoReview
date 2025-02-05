@@ -165,6 +165,13 @@ h3 {
   margin: 0 15px;
 }
 
+.keyword-type {
+  width: 55px;
+  height: 20px;
+  text-align: center;
+  writing-mode: horizontal-tb; 
+}
+
 .keyword-list {
   display: flex;
   overflow-x: auto;
@@ -174,6 +181,8 @@ h3 {
 }
 
 .keyword-item {
+  width: 55px;
+  height: 20px;
   padding: 10px 15px;
   background-color: #eaeaea;
   border-radius: 8px;
@@ -251,6 +260,11 @@ h3 {
   color: white;
 }
 
+.rating-star {
+  color: #dabd18b2;
+  font-style: normal;
+}
+
 #error-screen {
   display: flex;
   flex-direction: column;
@@ -270,7 +284,6 @@ h3 {
 
 #error-smallmessage,
 #error-message {
-  width: 100%;
   font-size: 14px;
   font-weight: 400;
   color: #333;
