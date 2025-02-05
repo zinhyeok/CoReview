@@ -59,6 +59,7 @@
         }
 
         let finalReviews = [...allReviews, ...lowRatingReviews['1'], ...lowRatingReviews['2']];
+        chrome.runtime.sendMessage({ action: "crawlComplete", data: finalReviews});
         console.log(`✅ 총 ${finalReviews.length}개의 리뷰를 수집했습니다.`);
         // saveJSON(finalReviews);
         sendToFlask(finalReviews);
@@ -200,5 +201,39 @@
             chrome.runtime.sendMessage({ action: "showErrorPage" });
         }
     }
+
+    chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+        if (request.action === "retrySendData") {
+            console.log("🔄 재전송 요청 수신: ", request.data);
+            sendFailedDataToFlask(request.data);
+        }
+    });
+    
+    async function sendFailedDataToFlask(reviews) {
+        try {
+            let response = await fetch("http://localhost:8000/analyze", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ reviews: reviews })
+            });
+    
+            if (!response.ok) {
+                throw new Error(`서버 오류: ${response.status}`);
+            }
+    
+            let data = await response.json();
+            console.log("✅ 재전송 성공: ", data);
+    
+            // 성공 메시지 popup.js로 전달
+            chrome.runtime.sendMessage({ action: "displayAnalysisResults", data: data });
+    
+        } catch (error) {
+            console.error("❌ 재전송 실패:", error);
+            chrome.runtime.sendMessage({ action: "showErrorPage" });
+        }
+    }
+    
 
 })();

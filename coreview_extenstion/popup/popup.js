@@ -1,4 +1,5 @@
 var selectedKeywords = new Set(); // 선택된 키워드를 관리할 Set
+var crawlResults;
 
 document.addEventListener("DOMContentLoaded", () => {
   
@@ -194,7 +195,7 @@ async function sendToFlask(reviews) {
   }
 }
 
-//서버로부터 response 받고 난뒤 코드
+//서버로부터 분석 response 받고 난뒤 코드
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === "displayAnalysisResults") {
       const jsonData = request.data;
@@ -394,20 +395,29 @@ function highlightKeyword(text, keyword) {
 }
 
 //error page관련
-//오류 메세지 retry btn
-// 오류 메세지 관련 btn 과 json파일 저장 코드 변경필요요
+
+//크롤링 결과 저장
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  if (request.action === "crawlResults") {
+      crawlResults = request.data;
+      sendResponse({ success: true });
+  }
+});
+
+
 document.getElementById("retry-btn").addEventListener("click", () => {
   chrome.runtime.sendMessage({ action: "retrySendData" }, (response) => {
     if (response && response.success) {
       console.log("🔄 재전송이 시작되었습니다.");
     } else {
-      console.warn("❌ 재전송할 데이터가 없습니다.");
+      console.log("❌ 재전송할 데이터가 없습니다.");
+      changeState("start-screen")
     }
   });
 });
 
 chrome.runtime.onMessage.addListener((request) => {
   if (request.action === "showErrorPage") {
-    changeState("error-screen")
+    changeState("error-screen", crawlResults)
   }
 });
