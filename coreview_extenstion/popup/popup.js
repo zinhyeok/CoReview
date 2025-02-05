@@ -1,4 +1,5 @@
 var selectedKeywords = new Set(); // 선택된 키워드를 관리할 Set
+var crawlResults;
 
 document.addEventListener("DOMContentLoaded", () => {
   
@@ -194,7 +195,7 @@ async function sendToFlask(reviews) {
   }
 }
 
-//서버로부터 response 받고 난뒤 코드
+//서버로부터 분석 response 받고 난뒤 코드
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === "displayAnalysisResults") {
       const jsonData = request.data;
@@ -232,6 +233,7 @@ function createCategorySection(title, keywords) {
 
   const sectionTitle = document.createElement("h4");
   sectionTitle.innerText = title;
+  sectionTitle.className = 'keyword-type'
   section.appendChild(sectionTitle);
 
   const keywordList = document.createElement("div");
@@ -343,18 +345,48 @@ function renderReviews(data) {
       // 키워드 제목 및 리뷰 섹션 추가
       const reviewHeader = document.createElement("div");
       reviewHeader.className = "review-header";
-      reviewHeader.innerHTML = `<strong>${keyword}</strong> <span class="rating">(${rating.toFixed(1)})</span>`;
+      reviewHeader.innerHTML = `<strong>${keyword}</strong> <span class="rating"> ${rating.toFixed(1)} <i class="rating-star">★</i></span>`;
       reviewsContainer.appendChild(reviewHeader);
 
       // 예시 문장 렌더링
       examples.forEach((example) => {
         const reviewItem = document.createElement("div");
         reviewItem.className = "review-item";
-        reviewItem.innerHTML = highlightKeyword(example, keyword);
+        reviewItem.innerHTML = processTextWithKeyword(example, keyword, maxLength = 25);
         reviewsContainer.appendChild(reviewItem);
       });
     }
   });
+}
+
+function processTextWithKeyword(text, keyword, maxLength = 100) {
+  // 1. 특수문자 제거 (숫자, 알파벳, 한글, 공백은 유지)
+  let filterText = text.replace(/[^\w\s가-힣]/g, "");
+  const cleanedText = filterText.replace(/\s{2,}/g, " ");
+
+  // 2. 키워드 위치 탐색
+  const keywordIndex = cleanedText.toLowerCase().indexOf(keyword.toLowerCase());
+  if (keywordIndex !== -1 && cleanedText.length > maxLength) {
+    // 3. 키워드 주변 문장 추출
+    const sentences = cleanedText.split(/(?<=[.?!])/g);  // 문장 분리 (마침표, 느낌표, 물음표 기준)
+    let targetSentence = "";
+    // 키워드가 포함된 문장을 찾음
+    for (let sentence of sentences) {
+      if (sentence.toLowerCase().includes(keyword.toLowerCase())) {
+        targetSentence = sentence.trim();
+        break;
+      }
+    }
+    // 문장이 너무 길면 자름
+    if (targetSentence.length > maxLength) {
+      const start = Math.max(0, targetSentence.indexOf(keyword) - Math.floor(maxLength / 2));
+      const end = Math.min(targetSentence.length, start + maxLength);
+      targetSentence = (start > 0 ? "" : "") + targetSentence.substring(start, end).trim() + (end < targetSentence.length ? "..." : "");
+    }
+    return highlightKeyword(targetSentence, keyword);
+  }
+  // 4. 키워드가 없거나 텍스트가 maxLength 이하인 경우 그대로 반환
+  return highlightKeyword(cleanedText, keyword);
 }
 
 function highlightKeyword(text, keyword) {
@@ -362,22 +394,30 @@ function highlightKeyword(text, keyword) {
   return text.replace(regex, '<span class="highlight">$1</span>');
 }
 
-
 //error page관련
-//오류 메세지 retry btn
-// 오류 메세지 관련 btn 과 json파일 저장 코드 변경필요요
+
+//크롤링 결과 저장
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  if (request.action === "crawlResults") {
+      crawlResults = request.data;
+      sendResponse({ success: true });
+  }
+});
+
+
 document.getElementById("retry-btn").addEventListener("click", () => {
   chrome.runtime.sendMessage({ action: "retrySendData" }, (response) => {
     if (response && response.success) {
       console.log("🔄 재전송이 시작되었습니다.");
     } else {
-      console.warn("❌ 재전송할 데이터가 없습니다.");
+      console.log("❌ 재전송할 데이터가 없습니다.");
+      changeState("start-screen")
     }
   });
 });
 
 chrome.runtime.onMessage.addListener((request) => {
   if (request.action === "showErrorPage") {
-    changeState("error-screen")
+    changeState("error-screen", crawlResults)
   }
 });

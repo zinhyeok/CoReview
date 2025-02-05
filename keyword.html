@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Coreview</title>
+    <link rel="stylesheet" href="popup.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+   </head>
+    <body>
+        <div id="app">
+        <!-- default Screen -->
+        <div id="default-screen">
+            <h2>리뷰의 본질을 한눈에,</h2>
+            <img src="../imgs/coreview_logo.png" alt="Coreview Logo" class="logo">
+            <hr class="divider">
+
+            <!-- Start Screen -->
+            <div id="start-screen" ,="" style="display: none;">
+            <div class="background-container">
+                <img src="../imgs/gray.png" alt="Background" class="background-image">
+                <button id="fast-btn" class="action-btn fast">
+                빠르게 리뷰 분석하기 <span>fast</span>
+                </button>
+                <button id="slow-btn" class="action-btn slow">
+                꼼꼼하게 리뷰 분석하기 <span>slow</span>
+                </button>
+            </div>
+            </div>
+
+            <!-- Loading Screen -->
+            <div id="loading-screen" style="display: none; opacity: 1;">
+            <img id="loadingImg" src="../imgs/loading.gif" alt="Loading" class="loading-icon">
+            </div>
+
+            <!-- Keywords Screen -->
+            <div id="keywords-screen" style="display: block;">
+            <h3>키워드 카테고리</h3>
+            <!--Keywords Categroy 렌더링 대상-->
+            <div id="keyword-categories"><div class="category-section"><h4>반응</h4><div class="keyword-list"><div class="keyword-item">솔직히 <span>(1)</span></div><div class="keyword-item">아쉬 <span>(3)</span></div><div class="keyword-item">예쁘 <span>(4)</span></div><div class="keyword-item">작아 <span>(3)</span></div></div></div><div class="category-section"><h4>특징</h4><div class="keyword-list"><div class="keyword-item">마음 <span>(4)</span></div><div class="keyword-item">배송 <span>(9)</span></div><div class="keyword-item">뿌리 <span>(13)</span></div><div class="keyword-item">상태 <span>(11)</span></div><div class="keyword-item">식물 <span>(30)</span></div><div class="keyword-item">싱싱 <span>(14)</span></div><div class="keyword-item">유리 <span>(11)</span></div><div class="keyword-item">재배 <span>(9)</span></div><div class="keyword-item">포장 <span>(11)</span></div><div class="keyword-item">화분 <span>(7)</span></div></div></div></div>
+            <!-- User input -->
+            <!-- <input type="text" id="custom-keyword" placeholder="키워드를 입력하세요"> -->
+            <div id="selected-keywords"></div>
+
+            <button id="organize-btn" class="action-btn disabled">
+                키워드 위주로 리뷰 정리
+            </button>
+            <!-- Review Result Screen -->
+            <div id="reviews-screen">
+                <!-- Loading for keyword -->
+                <div id="selected-reviews">
+                <div id="review-list"></div>
+                </div>
+            </div>
+            </div>
+            <!-- keyuwords screen end -->
+        </div>
+        <!-- Error Screen -->
+        <div id="error-screen" style="display: none">
+            <div class="error-icon">
+            <img src="../imgs/error_icon.svg" alt="Error Icon">
+            </div>
+            <h2 id="error-smallmessage">
+            죄송합니다 현재 잠시 오류가 발생하였습니다
+            </h2>
+            <p id="error-message">서버 통신 중 에러가 발생하였습니다</p>
+            <!-- Retry Request Button -->
+            <button id="retry-btn" class="action-btn retry">
+            다시 서버에 요청하기
+            </button>
+        </div>
+        <!-- Error Screen end -->
+        <!-- default Screen end-->
+        </div>
+        <!-- app end -->
+        <script src="popup.js"></script>
+    
+
+    </body>
+
+</html>

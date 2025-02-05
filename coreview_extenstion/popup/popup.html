@@ -66,19 +66,16 @@
         <!-- keyuwords screen end -->
       </div>
       <!-- Error Screen -->
-      <div id="error-screen" style="display: none">
+      <div id="error-screen">
         <div class="error-icon">
           <img src="../imgs/error_icon.svg" alt="Error Icon" />
         </div>
-        <h2 id="error-smallmessage">
-          죄송합니다 현재 잠시 오류가 발생하였습니다
-        </h2>
+        <h2 id="error-smallmessage">죄송합니다 현재 잠시 오류가 발생하였습니다</h2>
         <p id="error-message">서버 통신 중 에러가 발생하였습니다</p>
-        <!-- Retry Request Button -->
-        <button id="retry-btn" class="action-btn retry">
-          다시 서버에 요청하기
-        </button>
-      </div>
+        <div class="retry-btn-container">
+          <button id="retry-btn" class="action-btn">다시 서버에 요청하기</button>
+        </div>
+      </div>      
       <!-- Error Screen end -->
       <!-- default Screen end-->
     </div>
