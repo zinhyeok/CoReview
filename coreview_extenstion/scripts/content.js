@@ -341,7 +341,7 @@
             console.log("✅ 재전송 성공: ", data);
     
             // 성공 메시지 popup.js로 전달
-            chrome.runtime.sendMessage({ action: "displayAnalysisResults", data: data });
+            chrome.runtime.sendMessage({ action: "showAnalysis", data: data }); // background 경유로 결과 저장
     
         } catch (error) {
             console.error("❌ 재전송 실패:", error);

@@ -51,11 +51,19 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
     case "showAnalysis":
       console.log("📨 분석 결과 popup.js로 전송...");
+      // 팝업이 닫혀 있어도 다시 열 때 getState로 복원되도록 결과를 먼저 저장
+      tabStates[tabId] = "keywords-screen";
+      tabJsonData[tabId] = request.data;
       chrome.runtime.sendMessage({
         action: "displayAnalysisResults",
         data: request.data,
       });
       sendResponse({ success: true, message: "분석 결과 전달 완료" });
+      break;
+
+    case "showErrorPage":
+      tabStates[tabId] = "error-screen"; // 팝업 닫힌 상태에서 실패해도 loading에 갇히지 않게 (팝업은 원본 메시지를 직접 받음)
+      sendResponse({ success: true });
       break;
 
     case "saveFailedData":
