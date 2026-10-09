@@ -4,6 +4,7 @@
     window.__coreviewLoaded = true;
 
     const SERVER = "http://localhost:8000";
+    const RECIPE_VERSION = 2; // 레시피 스키마 바뀌면 올림 → 옛 캐시 무시하고 재발견
     let recipe = null; // 사이트별 셀렉터 레시피 (chrome.storage.local, hostname 키)
 
     chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
@@ -175,10 +176,11 @@
         console.log("✅ 강제 클릭 이벤트 발생:", element);
     }
     
-    // ---- 레시피: { container, userName, reviewDate, rating, reviewContent: {sel, attr}, nextPage } ----
+    // ---- 레시피: { container, userName, reviewDate, rating, reviewContent: {sel, attr, count}, nextPage, pager } ----
 
     function pick(root, field) {
         if (!field || !field.sel) return "";
+        if (field.count) return String(root.querySelectorAll(field.sel).length); // 별 아이콘 개수 = 별점
         const el = root.querySelector(field.sel);
         if (!el) return "";
         return (field.attr ? el.getAttribute(field.attr) : el.textContent)?.trim() || "";
@@ -197,20 +199,34 @@
         return reviews;
     }
 
+    const enabled = b => !!b && !b.disabled && !b.classList.contains("disabled") && b.getAttribute("aria-disabled") !== "true";
+
+    // 1) 명시적 다음 버튼 → 2) 페이저 안 "현재+1" 숫자 버튼 → 3) 페이저 마지막 버튼(화살표)
     function findNextPageButton(currentPage) {
-        const btn = recipe.nextPage && document.querySelector(recipe.nextPage);
-        if (!btn || btn.disabled || btn.classList.contains("disabled") || btn.getAttribute("aria-disabled") === "true") return null;
-        return btn;
+        if (recipe.nextPage) {
+            const btn = document.querySelector(recipe.nextPage);
+            if (enabled(btn)) return btn;
+        }
+        const pager = recipe.pager && document.querySelector(recipe.pager);
+        if (!pager) return null;
+        const btns = [...pager.querySelectorAll("button, a")];
+        const numbered = btns.find(b => b.textContent.trim() === String(currentPage + 1));
+        if (numbered) return numbered;
+        const last = btns[btns.length - 1];
+        return enabled(last) && !/^\d+$/.test(last.textContent.trim()) ? last : null;
     }
 
     const recipeKey = () => `recipe:${location.hostname}`;
 
     function loadRecipe() {
-        return new Promise(resolve => chrome.storage.local.get(recipeKey(), r => resolve(r[recipeKey()] || null)));
+        return new Promise(resolve => chrome.storage.local.get(recipeKey(), r => {
+            const saved = r[recipeKey()];
+            resolve(saved && saved.version === RECIPE_VERSION ? saved : null);
+        }));
     }
 
     function saveRecipe(r) {
-        chrome.storage.local.set({ [recipeKey()]: { ...r, updatedAt: Date.now() } });
+        chrome.storage.local.set({ [recipeKey()]: { ...r, version: RECIPE_VERSION, updatedAt: Date.now() } });
     }
 
     function recipeWorks(r) {
@@ -264,7 +280,9 @@
         });
         const walker = document.createTreeWalker(clone, NodeFilter.SHOW_TEXT);
         for (let n; (n = walker.nextNode());) n.nodeValue = n.nodeValue.trim().slice(0, 40);
-        return clone.outerHTML.replace(/\s+/g, " ").slice(0, 30000);
+        const html = clone.outerHTML.replace(/\s+/g, " ");
+        if (html.length <= 30000) return html;
+        return html.slice(0, 22000) + " <!-- ...truncated... --> " + html.slice(-8000); // 페이지네이션은 보통 끝에 있음
     }
 
     async function waitForPageChange(previousPageContent, maxRetries) {

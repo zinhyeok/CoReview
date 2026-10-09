@@ -297,11 +297,14 @@ Return ONLY a JSON object, no markdown, no explanation, with exactly this shape:
   "container": "<selector matching ONE review item; querySelectorAll must return every review on the page>",
   "userName": {{"sel": "<selector relative to container>", "attr": null}},
   "reviewDate": {{"sel": "<selector relative to container>", "attr": null}},
-  "rating": {{"sel": "<selector relative to container>", "attr": "<attribute holding the numeric rating, e.g. data-rating or aria-label, or null to use text>"}},
+  "rating": {{"sel": "<selector relative to container>", "attr": "<attribute holding the numeric rating, e.g. data-rating or aria-label, or null to use text>", "count": false}},
   "reviewContent": {{"sel": "<selector relative to container for the review body text>", "attr": null}},
-  "nextPage": "<selector for the next-page button/link, or null if there is no pagination>"
+  "nextPage": "<selector for an explicit next-page button/link, or null>",
+  "pager": "<selector for the pagination container that holds the page-number buttons (prefer data-* attributes), or null>"
 }}
 Rules: use stable class names or data attributes, avoid nth-child and hashed/random-looking classes.
+If the rating is shown as repeated filled-star icons (no number anywhere), set rating "sel" to the selector that matches ONE filled star icon and "count": true; the rating is then the number of matches.
+Pagination is often outside the review container but inside the sample; look for a block of numbered buttons.
 If a field truly does not exist, set its "sel" to null.
 
 HTML:
