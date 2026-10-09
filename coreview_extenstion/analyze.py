@@ -4,6 +4,7 @@ import pandas as pd
 import re
 import json
 import random
+import subprocess
 from konlpy.tag import Okt
 from soynlp.word import WordExtractor
 from soynlp.tokenizer import LTokenizer
@@ -11,6 +12,8 @@ from krwordrank.sentence import summarize_with_sentences
 from krwordrank.word import KRWordRank
 from flask import Flask, request, jsonify
 from flask_cors import CORS  # CORS 추가
+
+sys.stdout.reconfigure(encoding="utf-8", errors="replace")  # Windows cp949 콘솔에서 이모지 print 깨짐 방지
 
 app = Flask(__name__)
 CORS(app)  # 전체 도메인에서 요청 허용
@@ -283,6 +286,60 @@ def calculate_keyword_statistics(df, keyword_lists, review_column, rating_column
     return keyword_stats
 
 
+### 🔹 셀렉터 레시피 발견: 설치된 LLM CLI(claude/codex/gemini/ollama...)에 DOM 샘플을 stdin으로 넘김 ###
+LLM_CONFIG_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "llm_config.json")
+
+DISCOVER_PROMPT = """You are given a trimmed HTML sample of a product page from {url}.
+Find the CSS selectors needed to scrape the customer reviews.
+
+Return ONLY a JSON object, no markdown, no explanation, with exactly this shape:
+{{
+  "container": "<selector matching ONE review item; querySelectorAll must return every review on the page>",
+  "userName": {{"sel": "<selector relative to container>", "attr": null}},
+  "reviewDate": {{"sel": "<selector relative to container>", "attr": null}},
+  "rating": {{"sel": "<selector relative to container>", "attr": "<attribute holding the numeric rating, e.g. data-rating or aria-label, or null to use text>"}},
+  "reviewContent": {{"sel": "<selector relative to container for the review body text>", "attr": null}},
+  "nextPage": "<selector for the next-page button/link, or null if there is no pagination>"
+}}
+Rules: use stable class names or data attributes, avoid nth-child and hashed/random-looking classes.
+If a field truly does not exist, set its "sel" to null.
+
+HTML:
+{html}
+"""
+
+
+def run_llm(prompt):
+    """llm_config.json의 provider 명령을 실행하고 stdout에서 첫 JSON 객체를 뽑는다."""
+    with open(LLM_CONFIG_PATH, encoding="utf-8") as f:
+        cfg = json.load(f)
+    cmd = cfg["providers"][cfg["provider"]]
+    env = {k: v for k, v in os.environ.items() if k != "CLAUDECODE"}  # Claude Code 세션 안에서도 claude -p 중첩 실행 허용
+    proc = subprocess.run(cmd, input=prompt, capture_output=True, text=True, encoding="utf-8",
+                          errors="replace", shell=True, timeout=cfg.get("timeout_sec", 180), env=env)
+    out = proc.stdout or ""
+    start, end = out.find("{"), out.rfind("}")
+    if start < 0 or end < 0:
+        raise ValueError(f"LLM 출력에 JSON 없음 (exit {proc.returncode}): {out[:300]} {proc.stderr[:300]}")
+    return json.loads(out[start:end + 1])
+
+
+@app.route('/discover', methods=['POST'])
+def discover_recipe():
+    """content.js가 보낸 DOM 샘플로 리뷰 셀렉터 레시피를 만든다."""
+    data = request.json or {}
+    html = data.get("html", "")
+    if not html:
+        return jsonify({"error": "html이 없습니다."}), 400
+    try:
+        recipe = run_llm(DISCOVER_PROMPT.format(url=data.get("url", ""), html=html))
+        print("🧭 레시피:", recipe)
+        return jsonify(recipe)
+    except Exception as e:  # CLI 미설치, 타임아웃, JSON 파싱 실패 모두 500으로
+        print("❌ discover 실패:", e)
+        return jsonify({"error": str(e)}), 500
+
+
 @app.route('/analyze', methods=['POST'])
 def analyze_reviews():
     """크롬 익스텐션에서 받은 리뷰 데이터를 분석하는 API"""
@@ -331,7 +388,7 @@ def analyze_reviews():
             "count": keyword_stats_noun[keyword]["count"],
             "examples": filter_sentences(df, [keyword], min_length=1, max_length=8000, num_samples=3)
         }
-        for keyword in list(keyword_stats_noun.keys())[:10]  # 상위 10개만 선택
+        for keyword in [k for k, s in keyword_stats_noun.items() if s["count"] > 0][:10]  # 언급 0건 제외 후 상위 10개
     }
 
     ### 🔹 형용사(Adjective) 키워드 추출 ###
@@ -351,7 +408,7 @@ def analyze_reviews():
             "count": keyword_stats_adj[keyword]["count"],
             "examples": filter_sentences(df, [keyword], min_length=1, max_length=8000, num_samples=3)
         }
-        for keyword in list(keyword_stats_adj.keys())  # 상위 10개만 선택
+        for keyword in [k for k, s in keyword_stats_adj.items() if s["count"] > 0]  # 언급 0건 제외
     }
 
     return jsonify({"nouns": noun_result, "adjectives": adj_result})

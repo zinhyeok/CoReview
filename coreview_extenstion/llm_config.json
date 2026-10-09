@@ -1,0 +1,11 @@
+{
+  "provider": "claude",
+  "timeout_sec": 180,
+  "providers": {
+    "claude": "claude -p",
+    "codex": "codex exec --skip-git-repo-check -",
+    "gemini": "gemini -p \"Follow the instructions in stdin.\"",
+    "ollama": "ollama run llama3.1",
+    "opencode": "opencode run"
+  }
+}

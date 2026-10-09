@@ -1,4 +1,11 @@
 (() => {
+    // popup이 클릭마다 executeScript로 재주입하므로 리스너는 한 번만 등록
+    if (window.__coreviewLoaded) return;
+    window.__coreviewLoaded = true;
+
+    const SERVER = "http://localhost:8000";
+    let recipe = null; // 사이트별 셀렉터 레시피 (chrome.storage.local, hostname 키)
+
     chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         console.log("🔍 크롤링 요청 받음: ", request);
         if (request.action === "startCrawling") {
@@ -14,6 +21,13 @@
         let allReviews = [];
         let lowRatingReviews = { '1': [], '2': [] };
         let visitedPages = new Set();
+
+        recipe = await ensureRecipe();
+        if (!recipe) {
+            console.error("❌ 리뷰 셀렉터를 찾지 못했습니다.");
+            chrome.runtime.sendMessage({ action: "showErrorPage" });
+            return;
+        }
 
         if (mode === "fast") {
             console.log("🔹 상위 50개 리뷰 수집 시작...");
@@ -161,30 +175,96 @@
         console.log("✅ 강제 클릭 이벤트 발생:", element);
     }
     
+    // ---- 레시피: { container, userName, reviewDate, rating, reviewContent: {sel, attr}, nextPage } ----
+
+    function pick(root, field) {
+        if (!field || !field.sel) return "";
+        const el = root.querySelector(field.sel);
+        if (!el) return "";
+        return (field.attr ? el.getAttribute(field.attr) : el.textContent)?.trim() || "";
+    }
+
     function extractReviews() {
         const reviews = [];
-        document.querySelectorAll("article.sdp-review__article__list").forEach(reviewElement => {
+        document.querySelectorAll(recipe.container).forEach(reviewElement => {
             reviews.push({
-                userName: reviewElement.querySelector("span.sdp-review__article__list__info__user__name")?.textContent.trim() || "-",
-                reviewDate: reviewElement.querySelector("div.sdp-review__article__list__info__product-info__reg-date")?.textContent.trim() || "-",
-                rating: reviewElement.querySelector("div.sdp-review__article__list__info__product-info__star-orange")?.getAttribute("data-rating") || "0",
-                reviewContent: reviewElement.querySelector("div.sdp-review__article__list__review > div")?.textContent.trim() || "등록된 리뷰 내용이 없습니다"
+                userName: pick(reviewElement, recipe.userName) || "-",
+                reviewDate: pick(reviewElement, recipe.reviewDate) || "-",
+                rating: (pick(reviewElement, recipe.rating).match(/\d+(\.\d+)?/) || ["0"])[0], // "5", "5점", "별점 5" 모두 처리
+                reviewContent: pick(reviewElement, recipe.reviewContent) || "등록된 리뷰 내용이 없습니다"
             });
         });
         return reviews;
     }
-    
 
     function findNextPageButton(currentPage) {
-        let nextPageButton = document.querySelector(`button.sdp-review__article__page__num.js_reviewArticlePageBtn[data-page="${currentPage + 1}"]`);
-        // 다음 페이지 버튼이 없으면 "다음" 버튼 찾기
-        if (!nextPageButton) {
-            const nextArrowButton = document.querySelector(".sdp-review__article__page__next");
-            if (nextArrowButton && !nextArrowButton.classList.contains("disabled")) {
-                return nextArrowButton;
-            }
+        const btn = recipe.nextPage && document.querySelector(recipe.nextPage);
+        if (!btn || btn.disabled || btn.classList.contains("disabled") || btn.getAttribute("aria-disabled") === "true") return null;
+        return btn;
+    }
+
+    const recipeKey = () => `recipe:${location.hostname}`;
+
+    function loadRecipe() {
+        return new Promise(resolve => chrome.storage.local.get(recipeKey(), r => resolve(r[recipeKey()] || null)));
+    }
+
+    function saveRecipe(r) {
+        chrome.storage.local.set({ [recipeKey()]: { ...r, updatedAt: Date.now() } });
+    }
+
+    function recipeWorks(r) {
+        if (!r || !r.container) return false;
+        const first = document.querySelector(r.container);
+        return !!first && pick(first, r.reviewContent).length > 0;
+    }
+
+    // 캐시된 레시피가 현재 DOM에서 동작하면 그대로, 아니면 LLM에 새로 요청
+    async function ensureRecipe() {
+        const cached = await loadRecipe();
+        if (recipeWorks(cached)) return cached;
+        console.log("🔎 캐시 레시피 없음/실패 → 셀렉터 재발견 요청");
+        window.scrollTo(0, document.body.scrollHeight); // 지연 로딩 리뷰 영역 깨우기
+        await new Promise(r => setTimeout(r, 1500));
+        if (recipeWorks(cached)) return cached;
+        const fresh = await discoverRecipe();
+        if (!recipeWorks(fresh)) return null;
+        saveRecipe(fresh);
+        return fresh;
+    }
+
+    async function discoverRecipe() {
+        try {
+            const response = await fetch(`${SERVER}/discover`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ url: location.href, html: domSample() })
+            });
+            if (!response.ok) throw new Error(`서버 오류: ${response.status}`);
+            const r = await response.json();
+            console.log("🧭 LLM 레시피:", r);
+            return r;
+        } catch (error) {
+            console.error("❌ 레시피 발견 실패:", error);
+            return null;
         }
-        return nextPageButton;
+    }
+
+    // LLM에 보낼 DOM 샘플: 구조만 남기고 30KB로 자름
+    function domSample() {
+        // ponytail: class/id에 review가 들어간 가장 큰 영역을 고르는 휴리스틱. 못 찾으면 body 전체.
+        const candidates = [...document.querySelectorAll('[class*="review" i], [id*="review" i]')];
+        const root = candidates.sort((a, b) => b.querySelectorAll("*").length - a.querySelectorAll("*").length)[0] || document.body;
+        const clone = root.cloneNode(true);
+        clone.querySelectorAll("script, style, svg, noscript, iframe, link, meta, img, video").forEach(e => e.remove());
+        clone.querySelectorAll("*").forEach(el => {
+            [...el.attributes].forEach(a => {
+                if (!/^(class|id|data-|aria-label|aria-disabled|disabled)/.test(a.name)) el.removeAttribute(a.name);
+            });
+        });
+        const walker = document.createTreeWalker(clone, NodeFilter.SHOW_TEXT);
+        for (let n; (n = walker.nextNode());) n.nodeValue = n.nodeValue.trim().slice(0, 40);
+        return clone.outerHTML.replace(/\s+/g, " ").slice(0, 30000);
     }
 
     async function waitForPageChange(previousPageContent, maxRetries) {

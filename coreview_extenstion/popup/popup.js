@@ -45,9 +45,9 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   document.getElementById("keyword-categories").addEventListener("click", (event) => {
-    if (event.target.classList.contains("keyword-item")) {
-      const keyword = event.target.textContent.split(" ")[0];
-      toggleKeywordSelection(keyword, event.target);
+    const keywordItem = event.target.closest(".keyword-item");
+    if (keywordItem) {
+      toggleKeywordSelection(keywordItem.dataset.keyword, keywordItem);
     }
   });
   
@@ -240,16 +240,14 @@ function createCategorySection(title, keywords) {
   keywordList.className = "keyword-list";
 
   for (const [keyword, details] of Object.entries(keywords)) {
-    if (details.count !== 0) {
-        // 키워드 길이 조건 처리
-        const displayKeyword = keyword.length > 4 ? keyword.substring(0, 4) : keyword;
-        // 요소 생성 및 추가
-        const keywordItem = document.createElement("div");
-        keywordItem.className = "keyword-item";
-        keywordItem.innerHTML = `${displayKeyword} <span>${details.count}</span>`;
-        keywordList.appendChild(keywordItem);
-    }
-}
+    if (!(details.count > 0)) continue;
+    const keywordItem = document.createElement("div");
+    keywordItem.className = "keyword-item";
+    keywordItem.dataset.keyword = keyword; // 전체 키워드는 data 속성에, 표시는 4자까지
+    keywordItem.title = keyword;
+    keywordItem.innerHTML = `${keyword.slice(0, 4)} <span>${details.count}</span>`;
+    keywordList.appendChild(keywordItem);
+  }
   section.appendChild(keywordList);
   return section;
 }
@@ -289,7 +287,7 @@ function addKeyword(keyword) {
 function removeKeyword(keyword) {
   // `.keyword-item.selected` selected 상태 제거
   document.querySelectorAll(".keyword-item.selected").forEach((item) => {
-    if (item.textContent.trim().startsWith(keyword)) {
+    if (item.dataset.keyword === keyword) {
       item.classList.remove("selected");
     }
   });
